@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>斗六顧德補習班 - 老師專用成績登記系統</title>
+  <title>斗六顧德補習班 - 老師專用成績登記與登入系統</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Noto Sans TC -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -20,19 +20,18 @@
             sans: ['"Noto Sans TC"', 'Inter', 'sans-serif'],
           },
           colors: {
-            brand: {
-              50: '#f0fdf4',
-              100: '#dcfce7',
-              500: '#16a34a',
-              600: '#15803d',
-              700: '#166534',
-              800: '#14532d',
-              900: '#0f3e21',
+            navy: {
+              700: '#1e3a8a',
+              800: '#172554',
+              900: '#0f172a',
+              950: '#0b1329',
             },
-            gold: {
-              400: '#fbbf24',
+            accent: {
+              50: '#fffbeb',
+              100: '#fef3c7',
               500: '#f59e0b',
               600: '#d97706',
+              700: '#b45309',
             }
           }
         }
@@ -40,538 +39,605 @@
     }
   </script>
   <style>
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .gold-shine {
+      background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
     }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    .badge-pulse {
-      animation: pulse-ring 2s infinite;
-    }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+    .badge-glow {
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
-  <!-- TOP HEADER / NAV -->
-  <header class="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white shadow-lg sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center space-x-3">
-        <div class="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-          <i data-lucide="graduation-cap" class="w-6 h-6 text-emerald-300"></i>
+  <!-- ============================================================== -->
+  <!-- 1. 老師登入介面 (LOGIN VIEW) -->
+  <!-- ============================================================== -->
+  <div id="loginView" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(30,58,138,0.6),rgba(255,255,255,0))] px-4 transition-opacity duration-300">
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+      <!-- Brand Top -->
+      <div class="bg-gradient-to-br from-navy-900 via-navy-800 to-blue-900 text-white p-7 text-center relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-xl pointer-events-none"></div>
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-amber-400 mb-3 shadow-inner">
+          <i data-lucide="graduation-cap" class="w-8 h-8"></i>
         </div>
+        <div class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-semibold mb-1">
+          斗六旗艦校區 • 教學部
+        </div>
+        <h2 class="text-2xl font-black tracking-tight">斗六顧德補習班</h2>
+        <p class="text-xs text-blue-200/80 mt-1">國小國中成績登記與家長報喜作業系統</p>
+      </div>
+
+      <!-- Login Form Body -->
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="p-6 sm:p-8 space-y-5">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">斗六旗艦校</span>
-            <span class="text-xs text-emerald-200/80 hidden sm:inline">教師考評內部管理專用</span>
-          </div>
-          <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-            斗六顧德補習班
-            <span class="text-sm sm:text-base font-normal text-emerald-100/90 hidden md:inline">| 成績與榮譽登記系統</span>
-          </h1>
-        </div>
-      </div>
-
-      <!-- Quick Action Controls -->
-      <div class="flex items-center gap-2">
-        <button onclick="exportToCSV()" class="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition text-xs sm:text-sm font-medium flex items-center gap-1.5 border border-white/20">
-          <i data-lucide="download" class="w-4 h-4 text-emerald-300"></i>
-          <span>匯出 CSV</span>
-        </button>
-        <button onclick="openAddModal()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm shadow-md hover:shadow-emerald-500/25 active:scale-95 transition flex items-center gap-1.5">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>登記新成績</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN BODY -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-    <!-- KPI STATS SUMMARY CARDS -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium text-slate-400">總登錄筆數</p>
-          <h3 id="statTotal" class="text-2xl font-black text-slate-800 mt-1">0</h3>
-          <span class="text-[11px] text-slate-500">國中 + 國小全體</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
-          <i data-lucide="users" class="w-6 h-6"></i>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium text-indigo-500 font-semibold">國中部學員</p>
-          <h3 id="statJunior" class="text-2xl font-black text-indigo-700 mt-1">0</h3>
-          <span class="text-[11px] text-slate-500">國一 ~ 國三</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-          <i data-lucide="book-marked" class="w-6 h-6"></i>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium text-amber-500 font-semibold">國小部學員</p>
-          <h3 id="statPrimary" class="text-2xl font-black text-amber-700 mt-1">0</h3>
-          <span class="text-[11px] text-slate-500">小一 ~ 小六</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-          <i data-lucide="smile" class="w-6 h-6"></i>
-        </div>
-      </div>
-
-      <div class="bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl p-4 shadow-md text-white flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium text-yellow-100">榮獲獎狀學員</p>
-          <h3 id="statCert" class="text-2xl font-black text-white mt-1">0</h3>
-          <span class="text-[11px] text-yellow-100/90 font-medium">前三名 / 優等 / 進步</span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-white/20 text-yellow-100 flex items-center justify-center backdrop-blur-sm">
-          <i data-lucide="award" class="w-6 h-6"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAIN INTERFACE TABS & CONTROLS -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/70 overflow-hidden">
-      
-      <!-- TAB NAVIGATION -->
-      <div class="border-b border-slate-200/80 px-4 sm:px-6 pt-3 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70">
-        <div class="flex space-x-2">
-          <button onclick="switchTab('junior')" id="tabBtnJunior" class="tab-button px-4 py-2.5 font-bold text-sm rounded-t-xl transition flex items-center gap-2 border-b-2 border-emerald-600 text-emerald-800 bg-white shadow-sm">
-            <i data-lucide="backpack" class="w-4 h-4"></i>
-            <span>國中部成績簿</span>
-            <span id="badgeJuniorCount" class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">0</span>
-          </button>
-
-          <button onclick="switchTab('primary')" id="tabBtnPrimary" class="tab-button px-4 py-2.5 font-bold text-sm rounded-t-xl transition flex items-center gap-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
-            <i data-lucide="pencil" class="w-4 h-4"></i>
-            <span>國小部成績簿</span>
-            <span id="badgePrimaryCount" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-bold">0</span>
-          </button>
-
-          <button onclick="switchTab('honors')" id="tabBtnHonors" class="tab-button px-4 py-2.5 font-bold text-sm rounded-t-xl transition flex items-center gap-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
-            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
-            <span>金榜與榮譽牆</span>
-          </button>
-        </div>
-
-        <!-- Quick Search & Filter bar -->
-        <div class="flex items-center gap-2 pb-2.5 sm:pb-0 w-full sm:w-auto">
-          <div class="relative w-full sm:w-64">
-            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="searchInput" oninput="renderCurrentTable()" placeholder="搜尋學生姓名 / 學校 / 備註..." class="w-full pl-9 pr-3 py-1.5 text-xs sm:text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white">
-          </div>
-          
-          <select id="examFilter" onchange="renderCurrentTable()" class="py-1.5 px-3 text-xs sm:text-sm rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700">
-            <option value="">全部考試別</option>
-            <option value="第一次段考">第一次段考 / 定期評量</option>
-            <option value="第二次段考">第二次段考 / 定期評量</option>
-            <option value="第三次段考/期末考">第三次段考 / 期末考</option>
-            <option value="模擬考">國三模擬考 / 會考複習模考</option>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-4 h-4 text-blue-600"></i>
+            <span>老師姓名 / 稱謂</span>
+          </label>
+          <select id="loginTeacherName" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 bg-white font-medium text-slate-700">
+            <option value="林主任 (國中部負責人)">林主任 (國中部負責人)</option>
+            <option value="陳老師 (國小部主任)">陳老師 (國小部主任)</option>
+            <option value="張老師 (數理專任)">張老師 (數理專任)</option>
+            <option value="黃老師 (語文專任)">黃老師 (語文專任)</option>
+            <option value="顧德兼任輔導師">顧德兼任輔導師</option>
           </select>
         </div>
-      </div>
 
-      <!-- FILTER SUB-BAR (GRADE & AWARD) -->
-      <div class="px-4 sm:px-6 py-2.5 bg-slate-50 border-b border-slate-200/60 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-semibold text-slate-500">年級篩選:</span>
-          <div id="gradeChips" class="flex items-center gap-1.5 flex-wrap">
-            <!-- Dynamically populated chips -->
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <span id="filteredCountText" class="text-slate-500 font-medium">顯示 0 筆</span>
-          <button onclick="resetDataToDemo()" class="text-slate-400 hover:text-slate-600 underline text-xs">載入示範資料</button>
-        </div>
-      </div>
-
-      <!-- TAB 1: 國中部成績內容 -->
-      <div id="tabContentJunior" class="p-4 sm:p-6 space-y-4">
-        <div class="overflow-x-auto rounded-xl border border-slate-200">
-          <table class="w-full text-left border-collapse text-xs sm:text-sm">
-            <thead class="bg-slate-100/90 text-slate-700 uppercase font-semibold text-[11px] sm:text-xs tracking-wider border-b border-slate-200">
-              <tr>
-                <th class="py-3 px-3">學生資訊</th>
-                <th class="py-3 px-2 text-center">考試別</th>
-                <th class="py-3 px-2 text-right">國文</th>
-                <th class="py-3 px-2 text-right">英文</th>
-                <th class="py-3 px-2 text-right">數學</th>
-                <th class="py-3 px-2 text-right">自然</th>
-                <th class="py-3 px-2 text-right">社會</th>
-                <th class="py-3 px-2 text-right font-bold text-slate-900 bg-slate-200/60">總分</th>
-                <th class="py-3 px-2 text-right font-bold text-emerald-900 bg-emerald-50">平均</th>
-                <th class="py-3 px-2.5 text-center">班級名次</th>
-                <th class="py-3 px-2.5 text-center">全校名次</th>
-                <th class="py-3 px-3 text-center">家長通知</th>
-                <th class="py-3 px-3 text-center">操作</th>
-              </tr>
-            </thead>
-            <tbody id="juniorTableBody" class="divide-y divide-slate-200 bg-white">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-        <div id="juniorEmptyState" class="hidden text-center py-12 text-slate-400">
-          <i data-lucide="inbox" class="w-12 h-12 mx-auto text-slate-300 stroke-1"></i>
-          <p class="mt-2 text-sm font-medium">尚無國中部成績資料，請點擊上方「登記新成績」新增</p>
-        </div>
-      </div>
-
-      <!-- TAB 2: 國小部成績內容 -->
-      <div id="tabContentPrimary" class="p-4 sm:p-6 space-y-4 hidden">
-        <div class="overflow-x-auto rounded-xl border border-slate-200">
-          <table class="w-full text-left border-collapse text-xs sm:text-sm">
-            <thead class="bg-slate-100/90 text-slate-700 uppercase font-semibold text-[11px] sm:text-xs tracking-wider border-b border-slate-200">
-              <tr>
-                <th class="py-3 px-3">學生資訊</th>
-                <th class="py-3 px-2 text-center">評量別</th>
-                <th class="py-3 px-2 text-right">國語</th>
-                <th class="py-3 px-2 text-right">英語</th>
-                <th class="py-3 px-2 text-right">數學</th>
-                <th class="py-3 px-2 text-right">自然</th>
-                <th class="py-3 px-2 text-right">社會</th>
-                <th class="py-3 px-2 text-right font-bold text-slate-900 bg-slate-200/60">總分</th>
-                <th class="py-3 px-2 text-right font-bold text-amber-900 bg-amber-50">平均</th>
-                <th class="py-3 px-2.5 text-center">班級名次</th>
-                <th class="py-3 px-3 text-center">榮獲獎狀</th>
-                <th class="py-3 px-3 text-center">家長通知</th>
-                <th class="py-3 px-3 text-center">操作</th>
-              </tr>
-            </thead>
-            <tbody id="primaryTableBody" class="divide-y divide-slate-200 bg-white">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-        <div id="primaryEmptyState" class="hidden text-center py-12 text-slate-400">
-          <i data-lucide="inbox" class="w-12 h-12 mx-auto text-slate-300 stroke-1"></i>
-          <p class="mt-2 text-sm font-medium">尚無國小部成績資料，請點擊上方「登記新成績」新增</p>
-        </div>
-      </div>
-
-      <!-- TAB 3: 榮譽牆與排行榜 -->
-      <div id="tabContentHonors" class="p-4 sm:p-6 space-y-6 hidden">
-        
-        <!-- Top Banner for Cram School Honor -->
-        <div class="bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-          <div class="relative z-10 max-w-2xl">
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-yellow-100 font-bold text-xs">
-              <i data-lucide="flame" class="w-3.5 h-3.5"></i> 顧德榮譽紅榜
-            </span>
-            <h2 class="text-2xl sm:text-3xl font-black mt-2 tracking-tight">斗六在地家長最信賴 • 顧德金榜之星</h2>
-            <p class="text-amber-100 text-xs sm:text-sm mt-1">恭喜本次段考榮獲全校前十名、班級第一名與獲頒獎狀之優秀學員！</p>
-          </div>
-          <i data-lucide="award" class="absolute -right-6 -bottom-8 w-44 h-44 text-white/10 stroke-1"></i>
-        </div>
-
-        <!-- 3 Columns for Achievements -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <!-- Column 1: 國中全校風雲榜 (全校前20或班級第1) -->
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm sm:text-base">
-                <i data-lucide="crown" class="w-5 h-5 text-amber-500"></i>
-                國中部 • 校榜星光隊
-              </h3>
-              <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">高難度爭榮</span>
-            </div>
-            <div id="juniorHonorList" class="divide-y divide-slate-200/80 mt-2 flex-1">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <!-- Column 2: 國小部 獎狀榮譽群 (前三名/進步獎/滿分) -->
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm sm:text-base">
-                <i data-lucide="medal" class="w-5 h-5 text-indigo-500"></i>
-                國小部 • 獎狀光榮榜
-              </h3>
-              <span class="text-xs bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">榮譽肯認</span>
-            </div>
-            <div id="primaryHonorList" class="divide-y divide-slate-200/80 mt-2 flex-1">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <!-- Column 3: 顧德滿分之星 (任何科目 100 分) -->
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm sm:text-base">
-                <i data-lucide="sparkles" class="w-5 h-5 text-emerald-500"></i>
-                百分滿分之星
-              </h3>
-              <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">單科滿分</span>
-            </div>
-            <div id="perfectScoreList" class="divide-y divide-slate-200/80 mt-2 flex-1">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- QUICK TEACHER TIPS -->
-    <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 text-xs text-emerald-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-      <div class="flex items-start gap-2.5">
-        <i data-lucide="info" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
         <div>
-          <span class="font-bold">顧德老師操作小撇步：</span>
-          <span>點擊表格上的「<span class="font-bold text-emerald-700">LINE報喜</span>」按鈕，系統會自動生成給家長的專屬暖心祝賀文字，直接貼到 LINE 班級或個別家長對話框，省時又專業！</span>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="lock" class="w-4 h-4 text-blue-600"></i>
+              <span>老師授權 PIN 碼</span>
+            </label>
+            <span class="text-[11px] text-amber-600 font-semibold">預設密碼：1234</span>
+          </div>
+          <input type="password" id="loginPin" maxlength="10" placeholder="請輸入4位數字 PIN 碼" required class="w-full px-3.5 py-2.5 text-center tracking-widest text-base font-bold rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 bg-slate-50">
         </div>
-      </div>
-      <div class="shrink-0 text-slate-500 text-[11px]">
-        資料將自動儲存於您的本機瀏覽器中
-      </div>
+
+        <div id="loginErrorMsg" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-2.5 flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+          <span>PIN 碼錯誤，請輸入 1234 或點選下方一鍵快速登入</span>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm shadow-md hover:shadow-blue-700/25 active:scale-98 transition flex items-center justify-center gap-2">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>驗證身分並登入系統</span>
+          </button>
+
+          <button type="button" onclick="quickFillAndLogin()" class="w-full py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300/80 font-bold text-xs transition flex items-center justify-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>一鍵自動填入 PIN (1234) 並體驗登入</span>
+          </button>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 text-center">
+          <p class="text-[11px] text-slate-400">本系統限斗六顧德文理補習班內部教職員登記與分析使用</p>
+        </div>
+      </form>
     </div>
+  </div>
 
-  </main>
+  <!-- ============================================================== -->
+  <!-- 2. 主系統後台介面 (MAIN DASHBOARD VIEW) -->
+  <!-- ============================================================== -->
+  <div id="mainAppView" class="hidden flex-1 flex flex-col min-h-screen">
 
-  <!-- FOOTER -->
-  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
-      雲林縣斗六市顧德文理補習班 © 內部教師考評作業系統 • 專為雲林國中、斗六國中、公誠國小、鎮東國小等在地學子量身規劃
-    </div>
-  </footer>
-
-  <!-- ======================== MODALS ======================== -->
-
-  <!-- 1. ADD / EDIT GRADE MODAL -->
-  <div id="gradeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto border border-slate-100 flex flex-col">
-      
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between sticky top-0 bg-white z-10">
-        <div class="flex items-center gap-2">
-          <div id="modalIconWrap" class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-            <i data-lucide="edit-3" class="w-5 h-5"></i>
+    <!-- Top Navigation Bar -->
+    <header class="bg-navy-900 border-b border-navy-800 text-white shadow-md sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Logo and Cram School Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl gold-shine flex items-center justify-center shadow text-slate-950 font-black">
+            <i data-lucide="book-open-check" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 id="modalTitle" class="text-lg font-bold text-slate-800">登記新成績</h3>
-            <p class="text-xs text-slate-500">輸入各科成績，系統將自動精算總分與平均分</p>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/20">斗六顧德</span>
+              <span class="text-xs text-slate-400 hidden sm:inline">成績管考與家長聯絡系統</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+              老師專用成績登錄系統
+            </h1>
           </div>
         </div>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+
+        <!-- Right Side: Teacher Info & Actions -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Current Teacher Tag -->
+          <div class="flex items-center gap-2 bg-navy-800 px-3 py-1.5 rounded-xl border border-navy-700 text-xs">
+            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+            <span class="text-slate-300 hidden md:inline">已登入：</span>
+            <span id="currentTeacherDisplay" class="font-bold text-amber-300">老師</span>
+          </div>
+
+          <button onclick="exportToCSV()" title="匯出 Excel / CSV 格式" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span class="hidden sm:inline">匯出報表</span>
+          </button>
+
+          <button onclick="openAddModal()" class="px-3.5 py-1.5 rounded-xl gold-shine hover:opacity-95 active:scale-95 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>登記新成績</span>
+          </button>
+
+          <button onclick="handleLogout()" title="登出系統" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+      
+      <!-- Top Quick Status Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-slate-500">總學員人次</p>
+            <h3 id="statTotal" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+            <span class="text-[11px] text-slate-400">國中與國小已登記</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-blue-600">國中部學員</p>
+            <h3 id="statJunior" class="text-2xl font-black text-blue-900 mt-0.5">0</h3>
+            <span class="text-[11px] text-slate-400">國一至國三段考/模考</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="backpack" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-amber-600">國小部學員</p>
+            <h3 id="statPrimary" class="text-2xl font-black text-amber-900 mt-0.5">0</h3>
+            <span class="text-[11px] text-slate-400">小一至小六評量</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-amber-100">學校獲獎殊榮</p>
+            <h3 id="statCert" class="text-2xl font-black mt-0.5">0</h3>
+            <span class="text-[11px] text-amber-100/90 font-medium">榮獲學校獎狀或前三名</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-white/20 text-white flex items-center justify-center backdrop-blur-xs">
+            <i data-lucide="award" class="w-5 h-5"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Controls & Table Card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+        
+        <!-- Tab Bar -->
+        <div class="border-b border-slate-200 px-4 sm:px-6 pt-3 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70">
+          <div class="flex space-x-2">
+            <button onclick="switchTab('junior')" id="tabBtnJunior" class="px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 border-b-2 border-blue-700 text-blue-900 bg-white shadow-xs">
+              <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+              <span>國中部成績 (含全校/班級排名)</span>
+              <span id="badgeJunior" class="text-[11px] px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 font-bold">0</span>
+            </button>
+
+            <button onclick="switchTab('primary')" id="tabBtnPrimary" class="px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+              <i data-lucide="pencil" class="w-4 h-4"></i>
+              <span>國小部成績 (含獎狀/班名次)</span>
+              <span id="badgePrimary" class="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-bold">0</span>
+            </button>
+
+            <button onclick="switchTab('honors')" id="tabBtnHonors" class="px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+              <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+              <span>榮譽金榜牆</span>
+            </button>
+          </div>
+
+          <!-- Quick Search Filter Input -->
+          <div class="flex items-center gap-2 pb-2 sm:pb-0 w-full sm:w-auto">
+            <div class="relative w-full sm:w-60">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="text" id="searchInput" oninput="renderCurrentTable()" placeholder="搜尋姓名 / 學校 / 評語..." class="w-full pl-8.5 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white">
+            </div>
+
+            <select id="examFilter" onchange="renderCurrentTable()" class="py-1.5 px-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-700">
+              <option value="">全部考試別</option>
+              <option value="第一次段考">第一次段考 / 定期評量</option>
+              <option value="第二次段考">第二次段考</option>
+              <option value="第三次段考/期末考">第三次段考 / 期末評量</option>
+              <option value="模擬考">國三模擬考 / 複習考</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grade Filter Chips Bar -->
+        <div class="px-4 sm:px-6 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-slate-500 text-[11px]">年級篩選:</span>
+            <div id="gradeChips" class="flex items-center gap-1.5 flex-wrap">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-[11px]">
+            <span id="filteredCountText" class="text-slate-500 font-semibold">0 筆資料</span>
+            <button onclick="restoreDemoData()" class="text-blue-600 hover:text-blue-800 underline">重置示範資料</button>
+          </div>
+        </div>
+
+        <!-- TAB 1: 國中部表格 -->
+        <div id="tabContentJunior" class="p-4 sm:p-6 space-y-4">
+          <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-3">學生基本資訊</th>
+                  <th class="py-3 px-2 text-center">考試別</th>
+                  <th class="py-3 px-2 text-right">國文</th>
+                  <th class="py-3 px-2 text-right">英文</th>
+                  <th class="py-3 px-2 text-right">數學</th>
+                  <th class="py-3 px-2 text-right">自然</th>
+                  <th class="py-3 px-2 text-right">社會</th>
+                  <th class="py-3 px-2 text-right font-black text-slate-900 bg-slate-200/50">總分</th>
+                  <th class="py-3 px-2 text-right font-black text-blue-900 bg-blue-50">平均</th>
+                  <th class="py-3 px-2.5 text-center">班級名次</th>
+                  <th class="py-3 px-2.5 text-center">全校名次</th>
+                  <th class="py-3 px-3 text-center">家長報喜</th>
+                  <th class="py-3 px-3 text-center">管理操作</th>
+                </tr>
+              </thead>
+              <tbody id="juniorTableBody" class="divide-y divide-slate-200 bg-white">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
+          </div>
+          <div id="juniorEmpty" class="hidden text-center py-12 text-slate-400">
+            <i data-lucide="file-question" class="w-10 h-10 mx-auto text-slate-300 stroke-1 mb-2"></i>
+            <p class="text-sm">查無符合條件的國中成績紀錄</p>
+          </div>
+        </div>
+
+        <!-- TAB 2: 國小部表格 -->
+        <div id="tabContentPrimary" class="p-4 sm:p-6 space-y-4 hidden">
+          <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="py-3 px-3">學生基本資訊</th>
+                  <th class="py-3 px-2 text-center">評量別</th>
+                  <th class="py-3 px-2 text-right">國語</th>
+                  <th class="py-3 px-2 text-right">英語</th>
+                  <th class="py-3 px-2 text-right">數學</th>
+                  <th class="py-3 px-2 text-right">自然/生活</th>
+                  <th class="py-3 px-2 text-right">社會</th>
+                  <th class="py-3 px-2 text-right font-black text-slate-900 bg-slate-200/50">總分</th>
+                  <th class="py-3 px-2 text-right font-black text-amber-900 bg-amber-50">平均</th>
+                  <th class="py-3 px-2.5 text-center">班級名次</th>
+                  <th class="py-3 px-3 text-center">學校獎狀</th>
+                  <th class="py-3 px-3 text-center">家長報喜</th>
+                  <th class="py-3 px-3 text-center">管理操作</th>
+                </tr>
+              </thead>
+              <tbody id="primaryTableBody" class="divide-y divide-slate-200 bg-white">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
+          </div>
+          <div id="primaryEmpty" class="hidden text-center py-12 text-slate-400">
+            <i data-lucide="file-question" class="w-10 h-10 mx-auto text-slate-300 stroke-1 mb-2"></i>
+            <p class="text-sm">查無符合條件的國小成績紀錄</p>
+          </div>
+        </div>
+
+        <!-- TAB 3: 榮譽牆 -->
+        <div id="tabContentHonors" class="p-4 sm:p-6 space-y-5 hidden">
+          <div class="bg-gradient-to-r from-navy-900 via-blue-900 to-indigo-950 rounded-2xl p-6 text-white relative overflow-hidden shadow-md">
+            <div class="relative z-10 max-w-xl">
+              <span class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold mb-2">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> 顧德榮譽紅榜
+              </span>
+              <h2 class="text-2xl font-black">斗六優秀學子 • 段考卓越龍虎榜</h2>
+              <p class="text-xs text-blue-200 mt-1">恭賀全校前十名、班級第一名與獲頒獎狀之顧德優秀學員！</p>
+            </div>
+            <i data-lucide="trophy" class="absolute -right-4 -bottom-6 w-36 h-36 text-white/10 stroke-1"></i>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <!-- Col 1 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col">
+              <div class="flex items-center justify-between pb-2.5 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  <i data-lucide="crown" class="w-4 h-4 text-amber-500"></i>
+                  國中部 • 校榜星光隊
+                </h3>
+                <span class="text-[10px] bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">全校前20或班排第1</span>
+              </div>
+              <div id="honorJuniorList" class="divide-y divide-slate-200/80 mt-2 flex-1"></div>
+            </div>
+
+            <!-- Col 2 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col">
+              <div class="flex items-center justify-between pb-2.5 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  <i data-lucide="medal" class="w-4 h-4 text-blue-600"></i>
+                  國小部 • 獎狀光榮榜
+                </h3>
+                <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">獲頒獎狀</span>
+              </div>
+              <div id="honorPrimaryList" class="divide-y divide-slate-200/80 mt-2 flex-1"></div>
+            </div>
+
+            <!-- Col 3 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col">
+              <div class="flex items-center justify-between pb-2.5 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i>
+                  單科 100 滿分之星
+                </h3>
+                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">滿分榮譽</span>
+              </div>
+              <div id="honorPerfectList" class="divide-y divide-slate-200/80 mt-2 flex-1"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Helpful Footer Notice -->
+      <div class="p-3.5 bg-blue-50 border border-blue-200/80 rounded-xl flex items-center justify-between text-xs text-blue-900">
+        <div class="flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-blue-600 shrink-0"></i>
+          <span>點擊表格內「<strong class="text-blue-700">LINE報喜</strong>」即可自動生成親切溫暖的成果通知文案，一鍵複製並傳給家長！</span>
+        </div>
+        <span class="text-[11px] text-slate-500 hidden md:inline">系統自動儲存於瀏覽器</span>
+      </div>
+
+    </main>
+
+    <!-- App Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3 mt-auto text-center text-xs text-slate-400">
+      斗六顧德文理補習班 © 雲林在地優質升學首選 • 老師專用考評成績登記系統
+    </footer>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 3. 成績登記 / 編輯彈窗 MODAL -->
+  <!-- ============================================================== -->
+  <div id="recordModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-100">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+            <i data-lucide="edit" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="modalHeading" class="text-base font-bold text-slate-800">登記新成績</h3>
+            <p class="text-[11px] text-slate-500">輸入各科成績，自動即時計算總分與平均分</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Modal Form Body -->
-      <form id="gradeForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-5">
-        <input type="hidden" id="editItemId" value="">
+      <!-- Modal Form -->
+      <form id="recordForm" onsubmit="handleRecordSubmit(event)" class="p-6 space-y-4">
+        <input type="hidden" id="formRecordId" value="">
 
-        <!-- Division Selector (國中 vs 國小) -->
+        <!-- Division Selection -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">學制部別 <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">學制部別 <span class="text-red-500">*</span></label>
           <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50/60 transition">
-              <input type="radio" name="division" value="junior" id="divJunior" checked onchange="toggleDivisionForm()" class="accent-emerald-600">
+            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50/50 transition">
+              <input type="radio" name="formDivision" value="junior" id="radioJunior" checked onchange="handleDivisionSwitch()" class="accent-blue-600">
               <div>
-                <span class="block text-sm font-bold text-slate-800">國中部</span>
-                <span class="block text-[11px] text-slate-500">國一 ~ 國三 (含全校排名)</span>
+                <span class="block text-xs font-bold text-slate-800">國中部</span>
+                <span class="block text-[11px] text-slate-500">國一 ~ 國三 (含班級與全校排名)</span>
               </div>
             </label>
 
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50/60 transition">
-              <input type="radio" name="division" value="primary" id="divPrimary" onchange="toggleDivisionForm()" class="accent-amber-600">
+            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50/50 transition">
+              <input type="radio" name="formDivision" value="primary" id="radioPrimary" onchange="handleDivisionSwitch()" class="accent-amber-600">
               <div>
-                <span class="block text-sm font-bold text-slate-800">國小部</span>
-                <span class="block text-[11px] text-slate-500">小一 ~ 小六 (含獎狀認證)</span>
+                <span class="block text-xs font-bold text-slate-800">國小部</span>
+                <span class="block text-[11px] text-slate-500">小一 ~ 小六 (含獎狀開關與名次)</span>
               </div>
             </label>
           </div>
         </div>
 
-        <!-- Student Basic Info -->
+        <!-- Student Info Row -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">學生姓名 <span class="text-red-500">*</span></label>
-            <input type="text" id="formName" required placeholder="例如：林小明" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <input type="text" id="fieldName" required placeholder="如：林柏丞" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
           </div>
-
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">年級 <span class="text-red-500">*</span></label>
-            <select id="formGrade" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-              <!-- Dynamically changes with division -->
+            <select id="fieldGrade" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none bg-white">
+              <!-- Dynamically populated -->
             </select>
           </div>
-
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">原就讀學校 / 原班級</label>
-            <input type="text" id="formSchoolClass" placeholder="例如：斗六國中 102班" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">原就讀學校與班級</label>
+            <input type="text" id="fieldSchoolClass" placeholder="如：斗六國中 203班" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
           </div>
         </div>
 
-        <!-- Exam Session & Date -->
+        <!-- Exam Session Row -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">考試類別 <span class="text-red-500">*</span></label>
-            <select id="formExamType" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">考試 / 評量類別 <span class="text-red-500">*</span></label>
+            <select id="fieldExamType" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none bg-white">
               <option value="第一次段考">第一次段考 / 期中評量</option>
               <option value="第二次段考">第二次段考</option>
               <option value="第三次段考/期末考">第三次段考 / 期末評量</option>
               <option value="模擬考">模擬考 / 國三會考複習考</option>
+              <option value="單元測驗">單元評量 / 平時測驗</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">登記學年度 / 學期</label>
-            <input type="text" id="formSemester" value="113學年度上學期" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">登記學期</label>
+            <input type="text" id="fieldSemester" value="113學年度上學期" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
           </div>
         </div>
 
-        <!-- SUBJECT SCORES -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <!-- Scores Input Box -->
+        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="calculator" class="w-4 h-4 text-emerald-600"></i> 科目成績輸入 (滿分100)
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i data-lucide="calculator" class="w-4 h-4 text-blue-600"></i> 科目成績（滿分 100）
             </span>
             <div class="text-xs space-x-3">
-              <span class="text-slate-600 font-medium">總分: <strong id="calcTotal" class="text-slate-900 text-sm">0</strong></span>
-              <span class="text-emerald-700 font-bold">平均: <strong id="calcAvg" class="text-sm">0.0</strong></span>
+              <span class="text-slate-600">總分: <strong id="calcLiveTotal" class="text-slate-900 text-sm">0</strong></span>
+              <span class="text-blue-700 font-bold">平均: <strong id="calcLiveAvg" class="text-sm">0.0</strong></span>
             </div>
           </div>
 
           <div class="grid grid-cols-5 gap-2">
             <div>
-              <label id="lblSub1" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">國文</label>
-              <input type="number" id="score1" min="0" max="100" step="0.5" oninput="calculateScoresLive()" placeholder="0" class="w-full p-2 text-center text-sm font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label id="lblScore1" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">國文</label>
+              <input type="number" id="score1" min="0" max="100" step="0.5" oninput="calculateLiveScores()" placeholder="0" class="w-full p-2 text-center text-xs font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
             <div>
-              <label id="lblSub2" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">英文</label>
-              <input type="number" id="score2" min="0" max="100" step="0.5" oninput="calculateScoresLive()" placeholder="0" class="w-full p-2 text-center text-sm font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label id="lblScore2" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">英文</label>
+              <input type="number" id="score2" min="0" max="100" step="0.5" oninput="calculateLiveScores()" placeholder="0" class="w-full p-2 text-center text-xs font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
             <div>
-              <label id="lblSub3" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">數學</label>
-              <input type="number" id="score3" min="0" max="100" step="0.5" oninput="calculateScoresLive()" placeholder="0" class="w-full p-2 text-center text-sm font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label id="lblScore3" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">數學</label>
+              <input type="number" id="score3" min="0" max="100" step="0.5" oninput="calculateLiveScores()" placeholder="0" class="w-full p-2 text-center text-xs font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
             <div>
-              <label id="lblSub4" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">自然</label>
-              <input type="number" id="score4" min="0" max="100" step="0.5" oninput="calculateScoresLive()" placeholder="0" class="w-full p-2 text-center text-sm font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label id="lblScore4" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">自然</label>
+              <input type="number" id="score4" min="0" max="100" step="0.5" oninput="calculateLiveScores()" placeholder="0" class="w-full p-2 text-center text-xs font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
             <div>
-              <label id="lblSub5" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">社會</label>
-              <input type="number" id="score5" min="0" max="100" step="0.5" oninput="calculateScoresLive()" placeholder="0" class="w-full p-2 text-center text-sm font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label id="lblScore5" class="block text-[11px] font-semibold text-slate-600 mb-1 text-center">社會</label>
+              <input type="number" id="score5" min="0" max="100" step="0.5" oninput="calculateLiveScores()" placeholder="0" class="w-full p-2 text-center text-xs font-bold rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none">
             </div>
           </div>
         </div>
 
-        <!-- CONDITIONAL SECTION: 國中部排名指標 -->
-        <div id="juniorRankingFields" class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-3">
-          <div class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-600"></i>
-            國中名次指標 (班級名次 & 全校名次)
+        <!-- CONDITIONAL: 國中部排名指標 -->
+        <div id="sectionJuniorRank" class="p-3.5 bg-blue-50/70 rounded-xl border border-blue-200/80 space-y-2.5">
+          <div class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+            國中部排名指標（班排前3或全校前10自動標記榮譽之星）
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-semibold text-indigo-900 mb-1">原校班級名次</label>
-              <div class="flex items-center gap-1">
-                <span class="text-xs text-slate-500">第</span>
-                <input type="number" id="formClassRank" min="1" placeholder="1" class="w-20 px-2 py-1.5 text-center text-sm font-bold rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                <span class="text-xs text-slate-500">名 / 全班</span>
-                <input type="number" id="formClassTotal" min="1" placeholder="30" class="w-20 px-2 py-1.5 text-center text-sm rounded-lg border border-slate-300 focus:outline-none">
-                <span class="text-xs text-slate-500">人</span>
+              <label class="block text-[11px] font-semibold text-blue-900 mb-1">班級排名</label>
+              <div class="flex items-center gap-1 text-xs">
+                <span>第</span>
+                <input type="number" id="juniorClassRank" min="1" placeholder="1" class="w-16 px-2 py-1 text-center text-xs font-bold rounded border border-slate-300 focus:outline-none">
+                <span>名 / 全班</span>
+                <input type="number" id="juniorClassTotal" min="1" placeholder="30" class="w-16 px-2 py-1 text-center text-xs rounded border border-slate-300 focus:outline-none">
+                <span>人</span>
               </div>
             </div>
 
             <div>
-              <label class="block text-[11px] font-semibold text-indigo-900 mb-1">原校全校名次</label>
-              <div class="flex items-center gap-1">
-                <span class="text-xs text-slate-500">第</span>
-                <input type="number" id="formSchoolRank" min="1" placeholder="8" class="w-20 px-2 py-1.5 text-center text-sm font-bold rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                <span class="text-xs text-slate-500">名 / 全年級</span>
-                <input type="number" id="formSchoolTotal" min="1" placeholder="320" class="w-20 px-2 py-1.5 text-center text-sm rounded-lg border border-slate-300 focus:outline-none">
-                <span class="text-xs text-slate-500">人</span>
+              <label class="block text-[11px] font-semibold text-blue-900 mb-1">全校排名</label>
+              <div class="flex items-center gap-1 text-xs">
+                <span>第</span>
+                <input type="number" id="juniorSchoolRank" min="1" placeholder="5" class="w-16 px-2 py-1 text-center text-xs font-bold rounded border border-slate-300 focus:outline-none">
+                <span>名 / 全年級</span>
+                <input type="number" id="juniorSchoolTotal" min="1" placeholder="350" class="w-16 px-2 py-1 text-center text-xs rounded border border-slate-300 focus:outline-none">
+                <span>人</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- CONDITIONAL SECTION: 國小部名次與獎狀指標 -->
-        <div id="primaryRankingFields" class="p-4 bg-amber-50/70 rounded-xl border border-amber-200/80 space-y-3 hidden">
-          <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-            <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
-            國小榮譽指標 (班級名次 & 是否拿獎狀)
+        <!-- CONDITIONAL: 國小部名次與獎狀開關 -->
+        <div id="sectionPrimaryRank" class="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/80 space-y-3 hidden">
+          <div class="text-xs font-bold text-amber-900 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
+              國小榮譽指標（班級名次 & 獎狀榮譽）
+            </span>
           </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-semibold text-amber-900 mb-1">班級名次</label>
-              <div class="flex items-center gap-1">
-                <span class="text-xs text-slate-500">第</span>
-                <input type="number" id="formPriClassRank" min="1" placeholder="2" class="w-20 px-2 py-1.5 text-center text-sm font-bold rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-400">
-                <span class="text-xs text-slate-500">名</span>
+              <div class="flex items-center gap-1 text-xs">
+                <span>第</span>
+                <input type="number" id="primaryClassRank" min="1" placeholder="1" class="w-20 px-2 py-1 text-center text-xs font-bold rounded border border-slate-300 focus:outline-none">
+                <span>名</span>
               </div>
             </div>
 
             <div>
-              <label class="block text-[11px] font-semibold text-amber-900 mb-1">是否拿學校獎狀 <span class="text-red-500">*</span></label>
-              <select id="formPriAward" class="w-full px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white font-medium">
-                <option value="否">否 (未獲獎狀)</option>
-                <option value="是 - 第一名獎狀">🏆 是 - 榮獲第一名獎狀</option>
-                <option value="是 - 第二名獎狀">🥈 是 - 榮獲第二名獎狀</option>
-                <option value="是 - 第三名獎狀">🥉 是 - 榮獲第三名獎狀</option>
-                <option value="是 - 優等獎狀">📜 是 - 榮獲優等獎狀</option>
-                <option value="是 - 進步獎獎狀">🚀 是 - 榮獲最佳進步獎狀</option>
-                <option value="是 - 單科滿分獎狀">💯 是 - 榮獲單科滿分獎狀</option>
-                <option value="是 - 其他榮譽獎狀">🌟 是 - 其他榮譽獎狀</option>
+              <!-- Toggle Switch for Award -->
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-semibold text-amber-900">是否有獲發學校獎狀？</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="awardToggle" onchange="handleAwardToggleChange()" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                  <span id="awardToggleText" class="ml-2 text-xs font-bold text-slate-500">否</span>
+                </label>
+              </div>
+
+              <select id="awardTypeSelect" disabled class="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-300 bg-slate-100 focus:outline-none text-slate-600">
+                <option value="第一名獎狀">🏆 榮獲第一名獎狀</option>
+                <option value="第二名獎狀">🥈 榮獲第二名獎狀</option>
+                <option value="第三名獎狀">🥉 榮獲第三名獎狀</option>
+                <option value="優等獎狀">📜 榮獲優等獎狀</option>
+                <option value="最佳進步獎狀">🚀 榮獲最佳進步獎狀</option>
+                <option value="單科滿分獎狀">💯 榮獲單科滿分獎狀</option>
+                <option value="其他特殊榮譽獎狀">🌟 榮獲校內特殊榮譽獎狀</option>
               </select>
             </div>
           </div>
         </div>
 
-        <!-- Teacher Comments & Remarks -->
+        <!-- Teacher Remarks -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">顧德老師評語 / 複習建議</label>
-          <textarea id="formComments" rows="2" placeholder="例如：數學運算敏捷，本次段考幾何題型進步顯著！建議繼續保持。" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">顧德老師評語與叮嚀</label>
+          <textarea id="fieldComments" rows="2" placeholder="如：數學觀念紮實，本次段考幾何題型進步顯著！繼續保持。" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none"></textarea>
         </div>
 
-        <!-- Modal Footer Actions -->
-        <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-3">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition font-medium">取消</button>
-          <button type="submit" class="px-5 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md hover:shadow-emerald-600/30 transition flex items-center gap-1.5">
+        <!-- Modal Footer -->
+        <div class="pt-2 border-t border-slate-200 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">取消</button>
+          <button type="submit" class="px-4 py-2 rounded-lg text-xs font-bold bg-blue-700 hover:bg-blue-600 text-white shadow transition flex items-center gap-1.5">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>儲存成績紀錄</span>
           </button>
         </div>
       </form>
-
     </div>
   </div>
 
-  <!-- 2. LINE NOTIFICATION GENERATOR MODAL -->
-  <div id="lineModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-slate-100 overflow-hidden">
-      <div class="bg-emerald-600 p-4 text-white flex items-center justify-between">
+  <!-- ============================================================== -->
+  <!-- 4. LINE 家長報喜草稿彈窗 -->
+  <!-- ============================================================== -->
+  <div id="lineDraftModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100">
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-            <i data-lucide="message-square" class="w-5 h-5 text-emerald-100"></i>
+            <i data-lucide="message-circle" class="w-5 h-5 text-emerald-100"></i>
           </div>
           <div>
-            <h3 class="font-bold text-base">LINE 家長成績報喜信</h3>
-            <p class="text-[11px] text-emerald-100">一鍵複製，直接傳送給家長</p>
+            <h3 class="font-bold text-sm">LINE 家長成績成果報喜通知</h3>
+            <p class="text-[11px] text-emerald-100">專屬親切範本，一鍵複製直接傳送</p>
           </div>
         </div>
         <button onclick="closeLineModal()" class="text-white/80 hover:text-white p-1">
@@ -580,17 +646,17 @@
       </div>
 
       <div class="p-5 space-y-3">
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs sm:text-sm text-slate-700 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto" id="lineMessageContent">
-          <!-- Populated by script -->
+        <div id="lineMessageArea" class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs sm:text-sm font-sans text-slate-700 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto selection:bg-emerald-200">
+          <!-- Populated -->
         </div>
 
         <div class="flex items-center justify-between pt-2">
-          <span class="text-xs text-slate-400">已自動根據成績與排名生成鼓勵語</span>
+          <span class="text-[11px] text-slate-400">已自動整合名次與顧德老師評語</span>
           <div class="flex gap-2">
-            <button onclick="closeLineModal()" class="px-3.5 py-1.5 text-xs text-slate-600 font-medium hover:bg-slate-100 rounded-lg">關閉</button>
-            <button onclick="copyLineMessage()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow active:scale-95 transition">
-              <i data-lucide="copy" class="w-4 h-4"></i>
-              <span id="copyBtnText">複製通知訊息</span>
+            <button onclick="closeLineModal()" class="px-3 py-1.5 text-xs text-slate-600 font-medium hover:bg-slate-100 rounded-lg">關閉</button>
+            <button onclick="copyLineDraft()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow active:scale-95 transition">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span id="copyDraftBtnText">複製到剪貼簿</span>
             </button>
           </div>
         </div>
@@ -598,26 +664,47 @@
     </div>
   </div>
 
-  <!-- 3. TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl border bg-slate-900 text-white text-sm">
-    <i id="toastIcon" data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
-    <span id="toastMsg">操作成功</span>
+  <!-- ============================================================== -->
+  <!-- 5. 自訂刪除確認彈窗 (取代危險的 confirm) -->
+  <!-- ============================================================== -->
+  <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 border border-slate-100 space-y-3 text-center">
+      <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 mx-auto flex items-center justify-center">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h3 class="font-bold text-slate-800 text-base">確認刪除這筆成績？</h3>
+      <p id="deleteModalTargetText" class="text-xs text-slate-500">刪除後將無法還原此紀錄。</p>
+      <div class="flex items-center justify-center gap-2 pt-2">
+        <button onclick="closeDeleteModal()" class="w-1/2 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">取消</button>
+        <button id="confirmDeleteBtn" class="w-1/2 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 shadow transition">確認刪除</button>
+      </div>
+    </div>
   </div>
 
-  <!-- JAVASCRIPT APPLICATION LOGIC -->
-  <script>
-    // LocalStorage Keys
-    const STORAGE_KEY = 'douliu_gude_grades_v1';
+  <!-- ============================================================== -->
+  <!-- 6. TOAST NOTIFICATION MESSAGE -->
+  <!-- ============================================================== -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-xl border bg-slate-900 text-white text-xs">
+    <i id="toastIcon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">操作已完成</span>
+  </div>
 
-    // Current State
+  <!-- JAVASCRIPT SYSTEM ENGINE -->
+  <script>
+    const STORAGE_KEY = 'douliu_gude_grade_db_v2';
+    const AUTH_KEY = 'douliu_gude_auth_session';
+
+    // State
     let currentTab = 'junior'; // 'junior' | 'primary' | 'honors'
     let selectedGrade = 'ALL';
-    let gradeData = [];
+    let gradeRecords = [];
+    let deleteTargetId = null;
+    let currentGeneratedLineText = '';
 
-    // Default Demo Data for 斗六在地學校 (斗六國中, 雲林國中, 鎮東國小, 公誠國小, 鎮西國小)
-    const DEMO_DATA = [
+    // Demo Data for Douliu Schools (斗六國中, 雲林國中, 公誠國小, 鎮東國小, 鎮西國小)
+    const SEED_DATA = [
       {
-        id: 'J1',
+        id: 'DEMO-J1',
         division: 'junior',
         name: '張宇翔',
         grade: '國三',
@@ -628,14 +715,14 @@
         total: 483,
         avg: 96.6,
         classRank: 1,
-        classTotal: 30,
+        classTotal: 32,
         schoolRank: 3,
         schoolTotal: 380,
-        comments: '數理表現出類拔萃，數學段考勇奪100滿分！會考實力堅強。',
+        comments: '數理表現出類拔萃，數學段考勇奪滿分！複習會考節奏保持極佳。',
         createdAt: 1730000000000
       },
       {
-        id: 'J2',
+        id: 'DEMO-J2',
         division: 'junior',
         name: '林品潔',
         grade: '國二',
@@ -646,14 +733,14 @@
         total: 455,
         avg: 91.0,
         classRank: 2,
-        classTotal: 29,
-        schoolRank: 18,
+        classTotal: 30,
+        schoolRank: 9,
         schoolTotal: 340,
-        comments: '英文與國文語文科表現亮眼，數學二次函數掌握度大幅提升。',
+        comments: '英文語感極佳，數學二次函數掌握顯著提升，順利進入全校前十名！',
         createdAt: 1730000100000
       },
       {
-        id: 'J3',
+        id: 'DEMO-J3',
         division: 'junior',
         name: '王晨恩',
         grade: '國一',
@@ -664,14 +751,14 @@
         total: 440,
         avg: 88.0,
         classRank: 5,
-        classTotal: 28,
-        schoolRank: 42,
+        classTotal: 29,
+        schoolRank: 36,
         schoolTotal: 375,
-        comments: '小升國一適應狀況極佳，顧德晚自習專注度很高，值得鼓勵！',
+        comments: '小升初銜接穩定，顧德自習專注度很高，幾何計算細心度持續進步中。',
         createdAt: 1730000200000
       },
       {
-        id: 'P1',
+        id: 'DEMO-P1',
         division: 'primary',
         name: '陳巧恩',
         grade: '小六',
@@ -682,12 +769,13 @@
         total: 488,
         avg: 97.6,
         classRank: 1,
-        award: '是 - 第一名獎狀',
-        comments: '國語文滿分！恭喜榮獲學校第一名榮譽獎狀！',
+        hasAward: true,
+        awardType: '第一名獎狀',
+        comments: '國語文滿分！榮獲學校第一名大獎狀，表現令老師與家長驕傲！',
         createdAt: 1730000300000
       },
       {
-        id: 'P2',
+        id: 'DEMO-P2',
         division: 'primary',
         name: '黃柏睿',
         grade: '小五',
@@ -698,12 +786,13 @@
         total: 455,
         avg: 91.0,
         classRank: 2,
-        award: '是 - 第二名獎狀',
-        comments: '數學邏輯思考靈活，各科平衡發展，持續邁向顛峰！',
+        hasAward: true,
+        awardType: '第二名獎狀',
+        comments: '數學思考靈活敏捷，各科皆能保持在 90 分以上高水準！',
         createdAt: 1730000400000
       },
       {
-        id: 'P3',
+        id: 'DEMO-P3',
         division: 'primary',
         name: '李宜靜',
         grade: '小四',
@@ -714,79 +803,145 @@
         total: 446,
         avg: 89.2,
         classRank: 6,
-        award: '是 - 進步獎獎狀',
+        hasAward: true,
+        awardType: '最佳進步獎狀',
         comments: '本學期在顧德加強自然與數學後，成績大幅攀升近20分，榮獲最佳進步獎！',
         createdAt: 1730000500000
       }
     ];
 
-    // Initializer
+    // Initialize System
     window.addEventListener('DOMContentLoaded', () => {
-      loadData();
-      renderGradeFilterChips();
-      renderAll();
+      initDatabase();
+      checkAuthStatus();
       lucide.createIcons();
     });
 
-    // Load data from LocalStorage
-    function loadData() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
+    // 1. AUTHENTICATION & LOGIN FLOW
+    function checkAuthStatus() {
+      const session = localStorage.getItem(AUTH_KEY);
+      const loginView = document.getElementById('loginView');
+      const mainAppView = document.getElementById('mainAppView');
+
+      if (session) {
         try {
-          gradeData = JSON.parse(saved);
+          const authObj = JSON.parse(session);
+          document.getElementById('currentTeacherDisplay').innerText = authObj.teacherName || '顧德教師';
+          loginView.classList.add('hidden');
+          mainAppView.classList.remove('hidden');
+          renderAll();
         } catch (e) {
-          gradeData = [...DEMO_DATA];
+          localStorage.removeItem(AUTH_KEY);
+          loginView.classList.remove('hidden');
+          mainAppView.classList.add('hidden');
         }
       } else {
-        gradeData = [...DEMO_DATA];
-        saveData();
+        loginView.classList.remove('hidden');
+        mainAppView.classList.add('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const pin = document.getElementById('loginPin').value.trim();
+      const teacherName = document.getElementById('loginTeacherName').value;
+      const errorMsg = document.getElementById('loginErrorMsg');
+
+      // Authorization PIN rule: Default is 1234
+      if (pin === '1234') {
+        errorMsg.classList.add('hidden');
+        const authData = {
+          teacherName: teacherName,
+          loggedInAt: Date.now()
+        };
+        localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
+        showToast(`歡迎回來，${teacherName}！登入成功`, 'check-circle');
+        checkAuthStatus();
+      } else {
+        errorMsg.classList.remove('hidden');
+        showToast('PIN 碼不正確，預設為 1234', 'alert-circle');
       }
     }
 
-    // Save data to LocalStorage
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(gradeData));
-      updateSummaryStats();
+    function quickFillAndLogin() {
+      document.getElementById('loginPin').value = '1234';
+      document.getElementById('loginForm').dispatchEvent(new Event('submit'));
     }
 
-    // Reset to demo data
-    function resetDataToDemo() {
-      gradeData = JSON.parse(JSON.stringify(DEMO_DATA));
-      saveData();
+    function handleLogout() {
+      localStorage.removeItem(AUTH_KEY);
+      showToast('已安全登出系統', 'log-out');
+      checkAuthStatus();
+    }
+
+    // 2. DATA STORE
+    function initDatabase() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          gradeRecords = JSON.parse(stored);
+        } catch (e) {
+          gradeRecords = [...SEED_DATA];
+          saveDatabase();
+        }
+      } else {
+        gradeRecords = [...SEED_DATA];
+        saveDatabase();
+      }
+    }
+
+    function saveDatabase() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(gradeRecords));
+      updateCounts();
+    }
+
+    function restoreDemoData() {
+      gradeRecords = JSON.parse(JSON.stringify(SEED_DATA));
+      saveDatabase();
       renderAll();
-      showToast('已重新載入示範資料！', 'check-circle');
+      showToast('已還原為斗六校區範例資料庫', 'check-circle');
     }
 
-    // Tab Switching
+    // 3. TAB CONTROLLER
     function switchTab(tab) {
       currentTab = tab;
       selectedGrade = 'ALL';
 
-      // Button styling
-      const tabs = ['junior', 'primary', 'honors'];
-      tabs.forEach(t => {
-        const btn = document.getElementById(`tabBtn${capitalize(t)}`);
-        const content = document.getElementById(`tabContent${capitalize(t)}`);
-        if (t === tab) {
-          btn.className = 'tab-button px-4 py-2.5 font-bold text-sm rounded-t-xl transition flex items-center gap-2 border-b-2 border-emerald-600 text-emerald-800 bg-white shadow-sm';
-          content.classList.remove('hidden');
-        } else {
-          btn.className = 'tab-button px-4 py-2.5 font-bold text-sm rounded-t-xl transition flex items-center gap-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100';
-          content.classList.add('hidden');
-        }
+      const tabJunior = document.getElementById('tabBtnJunior');
+      const tabPrimary = document.getElementById('tabBtnPrimary');
+      const tabHonors = document.getElementById('tabBtnHonors');
+
+      const contentJunior = document.getElementById('tabContentJunior');
+      const contentPrimary = document.getElementById('tabContentPrimary');
+      const contentHonors = document.getElementById('tabContentHonors');
+
+      [tabJunior, tabPrimary, tabHonors].forEach(b => {
+        b.className = 'px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100';
       });
 
-      renderGradeFilterChips();
+      contentJunior.classList.add('hidden');
+      contentPrimary.classList.add('hidden');
+      contentHonors.classList.add('hidden');
+
+      if (tab === 'junior') {
+        tabJunior.className = 'px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 border-b-2 border-blue-700 text-blue-900 bg-white shadow-xs';
+        contentJunior.classList.remove('hidden');
+      } else if (tab === 'primary') {
+        tabPrimary.className = 'px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 border-b-2 border-amber-600 text-amber-900 bg-white shadow-xs';
+        contentPrimary.classList.remove('hidden');
+      } else {
+        tabHonors.className = 'px-4 py-2.5 font-bold text-xs sm:text-sm rounded-t-xl transition flex items-center gap-2 border-b-2 border-amber-500 text-slate-900 bg-white shadow-xs';
+        contentHonors.classList.remove('hidden');
+      }
+
+      renderGradeChips();
       renderCurrentTable();
       lucide.createIcons();
     }
 
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
     // Render Grade Chips
-    function renderGradeFilterChips() {
+    function renderGradeChips() {
       const container = document.getElementById('gradeChips');
       let grades = [];
       if (currentTab === 'junior') {
@@ -794,11 +949,11 @@
       } else if (currentTab === 'primary') {
         grades = ['小一', '小二', '小三', '小四', '小五', '小六'];
       } else {
-        grades = ['全部國中', '全部國小'];
+        grades = ['國中部', '國小部'];
       }
 
       let html = `
-        <button onclick="setGradeFilter('ALL')" class="px-2.5 py-1 rounded-md text-xs font-medium transition ${selectedGrade === 'ALL' ? 'bg-slate-800 text-white font-bold' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+        <button onclick="setGradeFilter('ALL')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition ${selectedGrade === 'ALL' ? 'bg-slate-800 text-white font-bold' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
           全部
         </button>
       `;
@@ -806,7 +961,7 @@
       grades.forEach(g => {
         const active = selectedGrade === g;
         html += `
-          <button onclick="setGradeFilter('${g}')" class="px-2.5 py-1 rounded-md text-xs font-medium transition ${active ? 'bg-emerald-600 text-white font-bold' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+          <button onclick="setGradeFilter('${g}')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition ${active ? 'bg-blue-600 text-white font-bold' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
             ${g}
           </button>
         `;
@@ -817,145 +972,143 @@
 
     function setGradeFilter(g) {
       selectedGrade = g;
-      renderGradeFilterChips();
+      renderGradeChips();
       renderCurrentTable();
     }
 
-    // Refresh All views
-    function renderAll() {
-      updateSummaryStats();
-      renderCurrentTable();
-      renderHonorsWall();
-    }
-
-    // Update KPI Header Cards
-    function updateSummaryStats() {
-      const total = gradeData.length;
-      const juniorCount = gradeData.filter(d => d.division === 'junior').length;
-      const primaryCount = gradeData.filter(d => d.division === 'primary').length;
-      const certCount = gradeData.filter(d => d.award && d.award.startsWith('是')).length;
+    // Summary Update
+    function updateCounts() {
+      const total = gradeRecords.length;
+      const juniorCount = gradeRecords.filter(r => r.division === 'junior').length;
+      const primaryCount = gradeRecords.filter(r => r.division === 'primary').length;
+      const certCount = gradeRecords.filter(r => (r.hasAward || (r.award && r.award.startsWith('是')))).length;
 
       document.getElementById('statTotal').innerText = total;
       document.getElementById('statJunior').innerText = juniorCount;
       document.getElementById('statPrimary').innerText = primaryCount;
       document.getElementById('statCert').innerText = certCount;
 
-      document.getElementById('badgeJuniorCount').innerText = juniorCount;
-      document.getElementById('badgePrimaryCount').innerText = primaryCount;
+      document.getElementById('badgeJunior').innerText = juniorCount;
+      document.getElementById('badgePrimary').innerText = primaryCount;
     }
 
-    // Render Table based on active tab
+    function renderAll() {
+      updateCounts();
+      renderGradeChips();
+      renderCurrentTable();
+      renderHonors();
+    }
+
+    // Filter & Render Current View
     function renderCurrentTable() {
-      const searchQuery = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-      const examFilter = document.getElementById('examFilter').value;
+      const search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const exam = document.getElementById('examFilter').value;
 
       if (currentTab === 'junior') {
-        renderJuniorTable(searchQuery, examFilter);
+        renderJuniorView(search, exam);
       } else if (currentTab === 'primary') {
-        renderPrimaryTable(searchQuery, examFilter);
+        renderPrimaryView(search, exam);
       } else {
-        renderHonorsWall();
+        renderHonors();
       }
       lucide.createIcons();
     }
 
-    // 1. Render Junior High
-    function renderJuniorTable(search, exam) {
+    // 4. JUNIOR VIEW TABLE
+    function renderJuniorView(search, exam) {
       const tbody = document.getElementById('juniorTableBody');
-      const emptyState = document.getElementById('juniorEmptyState');
+      const emptyBox = document.getElementById('juniorEmpty');
 
-      let list = gradeData.filter(d => d.division === 'junior');
-
+      let list = gradeRecords.filter(r => r.division === 'junior');
       if (selectedGrade !== 'ALL') {
-        list = list.filter(d => d.grade === selectedGrade);
+        list = list.filter(r => r.grade === selectedGrade);
       }
       if (exam) {
-        list = list.filter(d => d.examType === exam);
+        list = list.filter(r => r.examType === exam);
       }
       if (search) {
-        list = list.filter(d => 
-          (d.name && d.name.toLowerCase().includes(search)) ||
-          (d.schoolClass && d.schoolClass.toLowerCase().includes(search)) ||
-          (d.comments && d.comments.toLowerCase().includes(search))
+        list = list.filter(r => 
+          (r.name && r.name.toLowerCase().includes(search)) ||
+          (r.schoolClass && r.schoolClass.toLowerCase().includes(search)) ||
+          (r.comments && r.comments.toLowerCase().includes(search))
         );
       }
 
-      // Sort by School Rank or Total score
-      list.sort((a, b) => (a.schoolRank || 999) - (b.schoolRank || 999) || (b.total - a.total));
+      // Sort: School Rank first, then Total
+      list.sort((a,b) => (a.schoolRank || 999) - (b.schoolRank || 999) || b.total - a.total);
 
-      document.getElementById('filteredCountText').innerText = `顯示 ${list.length} 筆國中成績`;
+      document.getElementById('filteredCountText').innerText = `共 ${list.length} 筆國中紀錄`;
 
       if (list.length === 0) {
         tbody.innerHTML = '';
-        emptyState.classList.remove('hidden');
+        emptyBox.classList.remove('hidden');
         return;
       }
-      emptyState.classList.add('hidden');
+      emptyBox.classList.add('hidden');
 
-      tbody.innerHTML = list.map((item, idx) => {
+      tbody.innerHTML = list.map(item => {
         const isSchoolTop10 = item.schoolRank && item.schoolRank <= 10;
         const isClassTop3 = item.classRank && item.classRank <= 3;
 
         return `
-          <tr class="hover:bg-slate-50 transition border-b border-slate-100 group">
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
             <td class="py-3 px-3">
               <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs shrink-0">
-                  ${item.name.slice(0, 1)}
+                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 font-bold flex items-center justify-center text-xs shrink-0">
+                  ${escapeHtml(item.name.slice(0, 1))}
                 </div>
                 <div>
-                  <div class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  <div class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
                     ${escapeHtml(item.name)}
-                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">${item.grade}</span>
+                    <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">${item.grade}</span>
                   </div>
-                  <div class="text-[11px] text-slate-500 font-medium">${escapeHtml(item.schoolClass || '斗六地區國中')}</div>
+                  <div class="text-[11px] text-slate-500">${escapeHtml(item.schoolClass || '斗六地區國中')}</div>
                 </div>
               </div>
             </td>
 
             <td class="py-3 px-2 text-center text-xs text-slate-600">
-              <span class="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600">${escapeHtml(item.examType)}</span>
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">${escapeHtml(item.examType)}</span>
             </td>
 
-            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub1 === 100 ? 'text-emerald-600 font-bold' : ''}">${item.scores.sub1 ?? '-'}</td>
-            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub2 === 100 ? 'text-emerald-600 font-bold' : ''}">${item.scores.sub2 ?? '-'}</td>
-            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub3 === 100 ? 'text-emerald-600 font-bold' : ''}">${item.scores.sub3 ?? '-'}</td>
-            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub4 === 100 ? 'text-emerald-600 font-bold' : ''}">${item.scores.sub4 ?? '-'}</td>
-            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub5 === 100 ? 'text-emerald-600 font-bold' : ''}">${item.scores.sub5 ?? '-'}</td>
+            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub1 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub1 ?? '-'}</td>
+            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub2 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub2 ?? '-'}</td>
+            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub3 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub3 ?? '-'}</td>
+            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub4 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub4 ?? '-'}</td>
+            <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub5 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub5 ?? '-'}</td>
 
-            <td class="py-3 px-2 text-right font-mono font-black text-slate-900 bg-slate-100/60">${item.total}</td>
-            <td class="py-3 px-2 text-right font-mono font-black text-emerald-800 bg-emerald-50/70">${Number(item.avg).toFixed(1)}</td>
+            <td class="py-3 px-2 text-right font-mono font-black text-slate-900 bg-slate-100/50">${item.total}</td>
+            <td class="py-3 px-2 text-right font-mono font-black text-blue-900 bg-blue-50/70">${Number(item.avg).toFixed(1)}</td>
 
             <td class="py-3 px-2.5 text-center">
               ${item.classRank ? `
                 <span class="inline-flex items-center px-2 py-0.5 rounded-md font-bold text-xs ${isClassTop3 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700'}">
-                  第 ${item.classRank} 名 ${item.classTotal ? `<span class="text-[10px] font-normal text-slate-500 ml-1">/ ${item.classTotal}人</span>` : ''}
+                  ${isClassTop3 ? '⭐ ' : ''}第 ${item.classRank} 名 ${item.classTotal ? `<span class="text-[10px] font-normal text-slate-500 ml-1">/ ${item.classTotal}人</span>` : ''}
                 </span>
               ` : '<span class="text-slate-300">-</span>'}
             </td>
 
             <td class="py-3 px-2.5 text-center">
               ${item.schoolRank ? `
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs ${isSchoolTop10 ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-slate-100 text-slate-700'}">
-                  ${isSchoolTop10 ? '<i data-lucide="star" class="w-3 h-3 text-red-600 fill-red-500"></i>' : ''}
-                  第 ${item.schoolRank} 名 ${item.schoolTotal ? `<span class="text-[10px] font-normal text-slate-500 ml-1">/ ${item.schoolTotal}人</span>` : ''}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs ${isSchoolTop10 ? 'bg-red-100 text-red-700 border border-red-300 badge-glow' : 'bg-slate-100 text-slate-700'}">
+                  ${isSchoolTop10 ? '🔥 ' : ''}第 ${item.schoolRank} 名 ${item.schoolTotal ? `<span class="text-[10px] font-normal text-slate-500 ml-1">/ ${item.schoolTotal}人</span>` : ''}
                 </span>
               ` : '<span class="text-slate-300">-</span>'}
             </td>
 
             <td class="py-3 px-3 text-center">
-              <button onclick="openLineModal('${item.id}')" title="生成家長LINE報喜草稿" class="px-2.5 py-1 text-xs rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold border border-emerald-300/80 inline-flex items-center gap-1 active:scale-95 transition">
-                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <button onclick="openLineModal('${item.id}')" class="px-2.5 py-1 text-xs rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 inline-flex items-center gap-1 active:scale-95 transition">
+                <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-600"></i>
                 <span>LINE報喜</span>
               </button>
             </td>
 
             <td class="py-3 px-3 text-center">
               <div class="flex items-center justify-center gap-1">
-                <button onclick="openEditModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition" title="編輯">
-                  <i data-lucide="edit-2" class="w-4 h-4"></i>
+                <button onclick="openEditModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition" title="編輯">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
-                <button onclick="deleteGrade('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="刪除">
+                <button onclick="triggerDelete('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="刪除">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
               </div>
@@ -965,67 +1118,66 @@
       }).join('');
     }
 
-    // 2. Render Primary School
-    function renderPrimaryTable(search, exam) {
+    // 5. PRIMARY VIEW TABLE
+    function renderPrimaryView(search, exam) {
       const tbody = document.getElementById('primaryTableBody');
-      const emptyState = document.getElementById('primaryEmptyState');
+      const emptyBox = document.getElementById('primaryEmpty');
 
-      let list = gradeData.filter(d => d.division === 'primary');
-
+      let list = gradeRecords.filter(r => r.division === 'primary');
       if (selectedGrade !== 'ALL') {
-        list = list.filter(d => d.grade === selectedGrade);
+        list = list.filter(r => r.grade === selectedGrade);
       }
       if (exam) {
-        list = list.filter(d => d.examType === exam);
+        list = list.filter(r => r.examType === exam);
       }
       if (search) {
-        list = list.filter(d => 
-          (d.name && d.name.toLowerCase().includes(search)) ||
-          (d.schoolClass && d.schoolClass.toLowerCase().includes(search)) ||
-          (d.comments && d.comments.toLowerCase().includes(search)) ||
-          (d.award && d.award.toLowerCase().includes(search))
+        list = list.filter(r => 
+          (r.name && r.name.toLowerCase().includes(search)) ||
+          (r.schoolClass && r.schoolClass.toLowerCase().includes(search)) ||
+          (r.comments && r.comments.toLowerCase().includes(search))
         );
       }
 
-      // Sort by Award existence, classRank, total
-      list.sort((a, b) => {
-        const aHasAward = a.award && a.award.startsWith('是') ? 1 : 0;
-        const bHasAward = b.award && b.award.startsWith('是') ? 1 : 0;
-        if (bHasAward !== aHasAward) return bHasAward - aHasAward;
-        return (a.classRank || 99) - (b.classRank || 99) || (b.total - a.total);
+      // Sort: Awarded first, then classRank, then total
+      list.sort((a,b) => {
+        const aHas = a.hasAward ? 1 : 0;
+        const bHas = b.hasAward ? 1 : 0;
+        if (bHas !== aHas) return bHas - aHas;
+        return (a.classRank || 99) - (b.classRank || 99) || b.total - a.total;
       });
 
-      document.getElementById('filteredCountText').innerText = `顯示 ${list.length} 筆國小成績`;
+      document.getElementById('filteredCountText').innerText = `共 ${list.length} 筆國小紀錄`;
 
       if (list.length === 0) {
         tbody.innerHTML = '';
-        emptyState.classList.remove('hidden');
+        emptyBox.classList.remove('hidden');
         return;
       }
-      emptyState.classList.add('hidden');
+      emptyBox.classList.add('hidden');
 
       tbody.innerHTML = list.map(item => {
-        const hasAward = item.award && item.award.startsWith('是');
+        const hasAward = item.hasAward === true || (item.award && item.award.startsWith('是'));
+        const awardTitle = item.awardType || (item.award ? item.award.replace('是 - ', '') : '');
 
         return `
-          <tr class="hover:bg-slate-50 transition border-b border-slate-100 group">
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
             <td class="py-3 px-3">
               <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs shrink-0">
-                  ${item.name.slice(0, 1)}
+                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs shrink-0">
+                  ${escapeHtml(item.name.slice(0, 1))}
                 </div>
                 <div>
-                  <div class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  <div class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-1.5">
                     ${escapeHtml(item.name)}
-                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">${item.grade}</span>
+                    <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200">${item.grade}</span>
                   </div>
-                  <div class="text-[11px] text-slate-500 font-medium">${escapeHtml(item.schoolClass || '斗六地區國小')}</div>
+                  <div class="text-[11px] text-slate-500">${escapeHtml(item.schoolClass || '斗六地區國小')}</div>
                 </div>
               </div>
             </td>
 
             <td class="py-3 px-2 text-center text-xs text-slate-600">
-              <span class="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600">${escapeHtml(item.examType)}</span>
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">${escapeHtml(item.examType)}</span>
             </td>
 
             <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub1 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub1 ?? '-'}</td>
@@ -1034,8 +1186,8 @@
             <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub4 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub4 ?? '-'}</td>
             <td class="py-3 px-2 text-right font-mono font-medium ${item.scores.sub5 === 100 ? 'text-amber-600 font-bold' : ''}">${item.scores.sub5 ?? '-'}</td>
 
-            <td class="py-3 px-2 text-right font-mono font-black text-slate-900 bg-slate-100/60">${item.total}</td>
-            <td class="py-3 px-2 text-right font-mono font-black text-amber-800 bg-amber-50/70">${Number(item.avg).toFixed(1)}</td>
+            <td class="py-3 px-2 text-right font-mono font-black text-slate-900 bg-slate-100/50">${item.total}</td>
+            <td class="py-3 px-2 text-right font-mono font-black text-amber-900 bg-amber-50/70">${Number(item.avg).toFixed(1)}</td>
 
             <td class="py-3 px-2.5 text-center">
               ${item.classRank ? `
@@ -1047,9 +1199,9 @@
 
             <td class="py-3 px-3 text-center">
               ${hasAward ? `
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
                   <i data-lucide="award" class="w-3.5 h-3.5 text-amber-600"></i>
-                  ${escapeHtml(item.award.replace('是 - ', ''))}
+                  ${escapeHtml(awardTitle)}
                 </span>
               ` : `
                 <span class="text-slate-400 text-xs">無</span>
@@ -1057,18 +1209,18 @@
             </td>
 
             <td class="py-3 px-3 text-center">
-              <button onclick="openLineModal('${item.id}')" title="生成家長LINE報喜草稿" class="px-2.5 py-1 text-xs rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold border border-emerald-300/80 inline-flex items-center gap-1 active:scale-95 transition">
-                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <button onclick="openLineModal('${item.id}')" class="px-2.5 py-1 text-xs rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 inline-flex items-center gap-1 active:scale-95 transition">
+                <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-600"></i>
                 <span>LINE報喜</span>
               </button>
             </td>
 
             <td class="py-3 px-3 text-center">
               <div class="flex items-center justify-center gap-1">
-                <button onclick="openEditModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition" title="編輯">
-                  <i data-lucide="edit-2" class="w-4 h-4"></i>
+                <button onclick="openEditModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition" title="編輯">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
-                <button onclick="deleteGrade('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="刪除">
+                <button onclick="triggerDelete('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="刪除">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
               </div>
@@ -1078,148 +1230,141 @@
       }).join('');
     }
 
-    // 3. Render Honors Wall
-    function renderHonorsWall() {
-      // 1. Junior top ranks (school rank <= 20 or class rank 1)
-      const juniorHonors = gradeData.filter(d => d.division === 'junior' && ((d.schoolRank && d.schoolRank <= 25) || d.classRank === 1));
-      juniorHonors.sort((a,b) => (a.schoolRank || 99) - (b.schoolRank || 99));
+    // 6. HONORS WALL
+    function renderHonors() {
+      // Junior Honors
+      const jHonors = gradeRecords.filter(r => r.division === 'junior' && ((r.schoolRank && r.schoolRank <= 20) || r.classRank === 1));
+      jHonors.sort((a,b) => (a.schoolRank || 99) - (b.schoolRank || 99));
 
-      const juniorContainer = document.getElementById('juniorHonorList');
-      if (juniorHonors.length === 0) {
-        juniorContainer.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">尚無符合星光榜之國中學員</p>';
+      const jContainer = document.getElementById('honorJuniorList');
+      if (jHonors.length === 0) {
+        jContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">尚無符合條件的國中生榮譽紀錄</p>';
       } else {
-        juniorContainer.innerHTML = juniorHonors.map((item, idx) => `
-          <div class="py-3 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-7 h-7 rounded-full ${idx === 0 ? 'bg-amber-400 text-slate-900 font-black' : idx === 1 ? 'bg-slate-300 text-slate-800 font-bold' : 'bg-slate-200 text-slate-700'} flex items-center justify-center text-xs">
-                ${idx + 1}
-              </div>
+        jContainer.innerHTML = jHonors.map((item, i) => `
+          <div class="py-2.5 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full ${i === 0 ? 'bg-amber-400 font-black text-slate-900' : 'bg-slate-200 text-slate-700'} flex items-center justify-center text-[10px] font-bold">
+                ${i + 1}
+              </span>
               <div>
-                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(item.name)} <span class="text-xs text-slate-500 font-normal">(${item.grade})</span></h4>
-                <p class="text-xs text-slate-500">${escapeHtml(item.schoolClass || '斗六國中')} • 平均 ${Number(item.avg).toFixed(1)}分</p>
+                <p class="font-bold text-slate-800">${escapeHtml(item.name)} <span class="text-slate-400 font-normal">(${item.grade})</span></p>
+                <p class="text-[10px] text-slate-500">${escapeHtml(item.schoolClass || '')} • 平均 ${Number(item.avg).toFixed(1)}</p>
               </div>
             </div>
             <div class="text-right">
-              ${item.schoolRank ? `<span class="block text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">全校第 ${item.schoolRank} 名</span>` : ''}
-              ${item.classRank ? `<span class="block text-[11px] text-slate-600 mt-0.5">班級第 ${item.classRank} 名</span>` : ''}
+              ${item.schoolRank ? `<span class="px-2 py-0.5 rounded bg-red-100 text-red-700 font-bold block text-[11px]">全校第 ${item.schoolRank} 名</span>` : ''}
+              ${item.classRank ? `<span class="text-[10px] text-slate-500 block">班級第 ${item.classRank} 名</span>` : ''}
             </div>
           </div>
         `).join('');
       }
 
-      // 2. Primary Awards
-      const primaryHonors = gradeData.filter(d => d.division === 'primary' && d.award && d.award.startsWith('是'));
-      const priContainer = document.getElementById('primaryHonorList');
-      if (primaryHonors.length === 0) {
-        priContainer.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">尚無登記獎狀之國小學員</p>';
+      // Primary Honors
+      const pHonors = gradeRecords.filter(r => r.division === 'primary' && (r.hasAward || (r.award && r.award.startsWith('是'))));
+      const pContainer = document.getElementById('honorPrimaryList');
+      if (pHonors.length === 0) {
+        pContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">尚無獲獎之國小生榮譽紀錄</p>';
       } else {
-        priContainer.innerHTML = primaryHonors.map(item => `
-          <div class="py-3 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">
-                <i data-lucide="award" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(item.name)} <span class="text-xs text-slate-500 font-normal">(${item.grade})</span></h4>
-                <p class="text-xs text-slate-500">${escapeHtml(item.schoolClass || '斗六國小')} • 班排第 ${item.classRank || '-'} 名</p>
-              </div>
-            </div>
-            <div>
-              <span class="text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-1 rounded-full flex items-center gap-1">
-                ${escapeHtml(item.award.replace('是 - ', ''))}
+        pContainer.innerHTML = pHonors.map(item => `
+          <div class="py-2.5 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-[10px] font-bold">
+                <i data-lucide="award" class="w-3 h-3 text-amber-600"></i>
               </span>
+              <div>
+                <p class="font-bold text-slate-800">${escapeHtml(item.name)} <span class="text-slate-400 font-normal">(${item.grade})</span></p>
+                <p class="text-[10px] text-slate-500">${escapeHtml(item.schoolClass || '')}</p>
+              </div>
             </div>
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[10px]">
+              ${escapeHtml(item.awardType || (item.award ? item.award.replace('是 - ', '') : '榮獲獎狀'))}
+            </span>
           </div>
         `).join('');
       }
 
-      // 3. Perfect 100 Scores
+      // Perfect Scores
       const perfectList = [];
-      gradeData.forEach(d => {
-        const subs = [
-          { name: d.division === 'junior' ? '國文' : '國語', score: d.scores.sub1 },
-          { name: '英文', score: d.scores.sub2 },
-          { name: '數學', score: d.scores.sub3 },
-          { name: '自然', score: d.scores.sub4 },
-          { name: '社會', score: d.scores.sub5 }
-        ];
-        subs.forEach(s => {
-          if (Number(s.score) === 100) {
+      gradeRecords.forEach(r => {
+        const subTitles = r.division === 'junior' 
+          ? ['國文', '英文', '數學', '自然', '社會']
+          : ['國語', '英語', '數學', '自然/生活', '社會'];
+        const scores = [r.scores.sub1, r.scores.sub2, r.scores.sub3, r.scores.sub4, r.scores.sub5];
+        scores.forEach((sc, idx) => {
+          if (Number(sc) === 100) {
             perfectList.push({
-              name: d.name,
-              grade: d.grade,
-              school: d.schoolClass,
-              subName: s.name,
-              exam: d.examType
+              name: r.name,
+              grade: r.grade,
+              school: r.schoolClass,
+              sub: subTitles[idx]
             });
           }
         });
       });
 
-      const perfContainer = document.getElementById('perfectScoreList');
+      const perfContainer = document.getElementById('honorPerfectList');
       if (perfectList.length === 0) {
-        perfContainer.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">暫無單科100分滿分紀錄</p>';
+        perfContainer.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">暫無單科滿分紀錄</p>';
       } else {
         perfContainer.innerHTML = perfectList.map(item => `
-          <div class="py-3 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">
+          <div class="py-2.5 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-black">
                 100
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(item.name)} <span class="text-xs text-slate-500 font-normal">(${item.grade})</span></h4>
-                <p class="text-xs text-slate-500">${escapeHtml(item.school || '')}</p>
-              </div>
-            </div>
-            <div>
-              <span class="text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md">
-                ${item.subName} 100分滿分
               </span>
+              <div>
+                <p class="font-bold text-slate-800">${escapeHtml(item.name)} <span class="text-slate-400 font-normal">(${item.grade})</span></p>
+                <p class="text-[10px] text-slate-500">${escapeHtml(item.school || '')}</p>
+              </div>
             </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+              ${item.sub} 滿分
+            </span>
           </div>
         `).join('');
       }
     }
 
-    // Modal Operations
+    // 7. RECORD ADD & EDIT MODAL
     function openAddModal() {
-      document.getElementById('gradeForm').reset();
-      document.getElementById('editItemId').value = '';
-      document.getElementById('modalTitle').innerText = '登記新成績';
+      document.getElementById('recordForm').reset();
+      document.getElementById('formRecordId').value = '';
+      document.getElementById('modalHeading').innerText = '登記新成績';
 
       if (currentTab === 'primary') {
-        document.getElementById('divPrimary').checked = true;
+        document.getElementById('radioPrimary').checked = true;
       } else {
-        document.getElementById('divJunior').checked = true;
+        document.getElementById('radioJunior').checked = true;
       }
-      toggleDivisionForm();
-      calculateScoresLive();
 
-      document.getElementById('gradeModal').classList.remove('hidden');
+      handleDivisionSwitch();
+      handleAwardToggleChange();
+      calculateLiveScores();
+
+      document.getElementById('recordModal').classList.remove('hidden');
       lucide.createIcons();
     }
 
     function openEditModal(id) {
-      const item = gradeData.find(d => d.id === id);
+      const item = gradeRecords.find(r => r.id === id);
       if (!item) return;
 
-      document.getElementById('editItemId').value = item.id;
-      document.getElementById('modalTitle').innerText = `編輯成績紀錄 - ${item.name}`;
+      document.getElementById('formRecordId').value = item.id;
+      document.getElementById('modalHeading').innerText = `編輯成績紀錄 - ${item.name}`;
 
       if (item.division === 'primary') {
-        document.getElementById('divPrimary').checked = true;
+        document.getElementById('radioPrimary').checked = true;
       } else {
-        document.getElementById('divJunior').checked = true;
+        document.getElementById('radioJunior').checked = true;
       }
-      toggleDivisionForm();
+      handleDivisionSwitch();
 
-      document.getElementById('formName').value = item.name;
-      document.getElementById('formGrade').value = item.grade;
-      document.getElementById('formSchoolClass').value = item.schoolClass || '';
-      document.getElementById('formExamType').value = item.examType;
-      document.getElementById('formSemester').value = item.semester || '113學年度上學期';
+      document.getElementById('fieldName').value = item.name;
+      document.getElementById('fieldGrade').value = item.grade;
+      document.getElementById('fieldSchoolClass').value = item.schoolClass || '';
+      document.getElementById('fieldExamType').value = item.examType;
+      document.getElementById('fieldSemester').value = item.semester || '113學年度上學期';
 
-      // Scores
       document.getElementById('score1').value = item.scores.sub1 ?? '';
       document.getElementById('score2').value = item.scores.sub2 ?? '';
       document.getElementById('score3').value = item.scores.sub3 ?? '';
@@ -1227,49 +1372,56 @@
       document.getElementById('score5').value = item.scores.sub5 ?? '';
 
       // Junior fields
-      document.getElementById('formClassRank').value = item.classRank ?? '';
-      document.getElementById('formClassTotal').value = item.classTotal ?? '';
-      document.getElementById('formSchoolRank').value = item.schoolRank ?? '';
-      document.getElementById('formSchoolTotal').value = item.schoolTotal ?? '';
+      document.getElementById('juniorClassRank').value = item.classRank ?? '';
+      document.getElementById('juniorClassTotal').value = item.classTotal ?? '';
+      document.getElementById('juniorSchoolRank').value = item.schoolRank ?? '';
+      document.getElementById('juniorSchoolTotal').value = item.schoolTotal ?? '';
 
       // Primary fields
-      document.getElementById('formPriClassRank').value = item.classRank ?? '';
-      document.getElementById('formPriAward').value = item.award ?? '否';
+      document.getElementById('primaryClassRank').value = item.classRank ?? '';
+      const hasAward = item.hasAward === true || (item.award && item.award.startsWith('是'));
+      document.getElementById('awardToggle').checked = hasAward;
+      if (item.awardType) {
+        document.getElementById('awardTypeSelect').value = item.awardType;
+      }
+      handleAwardToggleChange();
 
-      document.getElementById('formComments').value = item.comments || '';
+      document.getElementById('fieldComments').value = item.comments || '';
 
-      calculateScoresLive();
-      document.getElementById('gradeModal').classList.remove('hidden');
+      calculateLiveScores();
+      document.getElementById('recordModal').classList.remove('hidden');
       lucide.createIcons();
     }
 
     function closeModal() {
-      document.getElementById('gradeModal').classList.add('hidden');
+      document.getElementById('recordModal').classList.add('hidden');
     }
 
-    // Toggle division layout in form
-    function toggleDivisionForm() {
-      const isJunior = document.getElementById('divJunior').checked;
-      const gradeSelect = document.getElementById('formGrade');
-      const juniorRanking = document.getElementById('juniorRankingFields');
-      const primaryRanking = document.getElementById('primaryRankingFields');
+    function handleDivisionSwitch() {
+      const isJunior = document.getElementById('radioJunior').checked;
+      const gradeSel = document.getElementById('fieldGrade');
+      const secJunior = document.getElementById('sectionJuniorRank');
+      const secPrimary = document.getElementById('sectionPrimaryRank');
 
-      // Labels
-      const lblSub1 = document.getElementById('lblSub1');
+      const lbl1 = document.getElementById('lblScore1');
+      const lbl4 = document.getElementById('lblScore4');
+
       if (isJunior) {
-        lblSub1.innerText = '國文';
-        juniorRanking.classList.remove('hidden');
-        primaryRanking.classList.add('hidden');
-        gradeSelect.innerHTML = `
+        lbl1.innerText = '國文';
+        lbl4.innerText = '自然';
+        secJunior.classList.remove('hidden');
+        secPrimary.classList.add('hidden');
+        gradeSel.innerHTML = `
           <option value="國一">國中一年級 (國一)</option>
           <option value="國二">國中二年級 (國二)</option>
           <option value="國三">國中三年級 (國三/會考)</option>
         `;
       } else {
-        lblSub1.innerText = '國語';
-        juniorRanking.classList.add('hidden');
-        primaryRanking.classList.remove('hidden');
-        gradeSelect.innerHTML = `
+        lbl1.innerText = '國語';
+        lbl4.innerText = '自然/生活';
+        secJunior.classList.add('hidden');
+        secPrimary.classList.remove('hidden');
+        gradeSel.innerHTML = `
           <option value="小一">國小一年級 (小一)</option>
           <option value="小二">國小二年級 (小二)</option>
           <option value="小三">國小三年級 (小三)</option>
@@ -1280,32 +1432,55 @@
       }
     }
 
-    // Live calculate totals and averages
-    function calculateScoresLive() {
-      const s1 = parseFloat(document.getElementById('score1').value) || 0;
-      const s2 = parseFloat(document.getElementById('score2').value) || 0;
-      const s3 = parseFloat(document.getElementById('score3').value) || 0;
-      const s4 = parseFloat(document.getElementById('score4').value) || 0;
-      const s5 = parseFloat(document.getElementById('score5').value) || 0;
+    function handleAwardToggleChange() {
+      const checked = document.getElementById('awardToggle').checked;
+      const labelText = document.getElementById('awardToggleText');
+      const selectBox = document.getElementById('awardTypeSelect');
 
-      // Count entered subjects
-      const vals = [document.getElementById('score1').value, document.getElementById('score2').value, document.getElementById('score3').value, document.getElementById('score4').value, document.getElementById('score5').value];
-      let activeCount = vals.filter(v => v !== '').length;
-      if (activeCount === 0) activeCount = 5;
-
-      const total = s1 + s2 + s3 + s4 + s5;
-      const avg = (total / (activeCount || 5)).toFixed(1);
-
-      document.getElementById('calcTotal').innerText = total;
-      document.getElementById('calcAvg').innerText = avg;
+      if (checked) {
+        labelText.innerText = '是 (已獲獎狀)';
+        labelText.className = 'ml-2 text-xs font-bold text-amber-600';
+        selectBox.disabled = false;
+        selectBox.classList.remove('bg-slate-100', 'text-slate-400');
+        selectBox.classList.add('bg-white', 'text-slate-800');
+      } else {
+        labelText.innerText = '否 (未獲獎狀)';
+        labelText.className = 'ml-2 text-xs font-bold text-slate-500';
+        selectBox.disabled = true;
+        selectBox.classList.add('bg-slate-100', 'text-slate-400');
+        selectBox.classList.remove('bg-white', 'text-slate-800');
+      }
     }
 
-    // Handle Form Submit
-    function handleFormSubmit(e) {
+    function calculateLiveScores() {
+      const v1 = parseFloat(document.getElementById('score1').value) || 0;
+      const v2 = parseFloat(document.getElementById('score2').value) || 0;
+      const v3 = parseFloat(document.getElementById('score3').value) || 0;
+      const v4 = parseFloat(document.getElementById('score4').value) || 0;
+      const v5 = parseFloat(document.getElementById('score5').value) || 0;
+
+      const raw = [
+        document.getElementById('score1').value,
+        document.getElementById('score2').value,
+        document.getElementById('score3').value,
+        document.getElementById('score4').value,
+        document.getElementById('score5').value
+      ];
+      let filled = raw.filter(x => x !== '').length;
+      if (filled === 0) filled = 5;
+
+      const total = v1 + v2 + v3 + v4 + v5;
+      const avg = (total / (filled || 5)).toFixed(1);
+
+      document.getElementById('calcLiveTotal').innerText = total;
+      document.getElementById('calcLiveAvg').innerText = avg;
+    }
+
+    function handleRecordSubmit(e) {
       e.preventDefault();
 
-      const editId = document.getElementById('editItemId').value;
-      const isJunior = document.getElementById('divJunior').checked;
+      const recordId = document.getElementById('formRecordId').value;
+      const isJunior = document.getElementById('radioJunior').checked;
       const division = isJunior ? 'junior' : 'primary';
 
       const s1 = document.getElementById('score1').value === '' ? null : parseFloat(document.getElementById('score1').value);
@@ -1314,34 +1489,38 @@
       const s4 = document.getElementById('score4').value === '' ? null : parseFloat(document.getElementById('score4').value);
       const s5 = document.getElementById('score5').value === '' ? null : parseFloat(document.getElementById('score5').value);
 
-      const validScores = [s1, s2, s3, s4, s5].filter(s => s !== null);
-      const total = validScores.reduce((acc, curr) => acc + curr, 0);
-      const avg = validScores.length ? (total / validScores.length) : 0;
+      const validList = [s1, s2, s3, s4, s5].filter(v => v !== null);
+      const total = validList.reduce((acc, c) => acc + c, 0);
+      const avg = validList.length ? (total / validList.length) : 0;
 
       let classRank = null;
       let classTotal = null;
       let schoolRank = null;
       let schoolTotal = null;
-      let award = '否';
+      let hasAward = false;
+      let awardType = '';
 
       if (isJunior) {
-        classRank = document.getElementById('formClassRank').value ? parseInt(document.getElementById('formClassRank').value) : null;
-        classTotal = document.getElementById('formClassTotal').value ? parseInt(document.getElementById('formClassTotal').value) : null;
-        schoolRank = document.getElementById('formSchoolRank').value ? parseInt(document.getElementById('formSchoolRank').value) : null;
-        schoolTotal = document.getElementById('formSchoolTotal').value ? parseInt(document.getElementById('formSchoolTotal').value) : null;
+        classRank = document.getElementById('juniorClassRank').value ? parseInt(document.getElementById('juniorClassRank').value) : null;
+        classTotal = document.getElementById('juniorClassTotal').value ? parseInt(document.getElementById('juniorClassTotal').value) : null;
+        schoolRank = document.getElementById('juniorSchoolRank').value ? parseInt(document.getElementById('juniorSchoolRank').value) : null;
+        schoolTotal = document.getElementById('juniorSchoolTotal').value ? parseInt(document.getElementById('juniorSchoolTotal').value) : null;
       } else {
-        classRank = document.getElementById('formPriClassRank').value ? parseInt(document.getElementById('formPriClassRank').value) : null;
-        award = document.getElementById('formPriAward').value;
+        classRank = document.getElementById('primaryClassRank').value ? parseInt(document.getElementById('primaryClassRank').value) : null;
+        hasAward = document.getElementById('awardToggle').checked;
+        if (hasAward) {
+          awardType = document.getElementById('awardTypeSelect').value;
+        }
       }
 
-      const itemPayload = {
-        id: editId || 'item_' + Date.now(),
+      const payload = {
+        id: recordId || 'REC_' + Date.now(),
         division: division,
-        name: document.getElementById('formName').value.trim(),
-        grade: document.getElementById('formGrade').value,
-        schoolClass: document.getElementById('formSchoolClass').value.trim(),
-        examType: document.getElementById('formExamType').value,
-        semester: document.getElementById('formSemester').value.trim(),
+        name: document.getElementById('fieldName').value.trim(),
+        grade: document.getElementById('fieldGrade').value,
+        schoolClass: document.getElementById('fieldSchoolClass').value.trim(),
+        examType: document.getElementById('fieldExamType').value,
+        semester: document.getElementById('fieldSemester').value.trim(),
         scores: { sub1: s1, sub2: s2, sub3: s3, sub4: s4, sub5: s5 },
         total: total,
         avg: avg,
@@ -1349,170 +1528,197 @@
         classTotal: classTotal,
         schoolRank: schoolRank,
         schoolTotal: schoolTotal,
-        award: award,
-        comments: document.getElementById('formComments').value.trim(),
+        hasAward: hasAward,
+        awardType: awardType,
+        comments: document.getElementById('fieldComments').value.trim(),
         updatedAt: Date.now()
       };
 
-      if (editId) {
-        const index = gradeData.findIndex(d => d.id === editId);
-        if (index !== -1) {
-          gradeData[index] = itemPayload;
-        }
-        showToast('成績資料更新成功！', 'check-circle');
+      if (recordId) {
+        const idx = gradeRecords.findIndex(r => r.id === recordId);
+        if (idx !== -1) gradeRecords[idx] = payload;
+        showToast('成績紀錄已成功更新！', 'check-circle');
       } else {
-        itemPayload.createdAt = Date.now();
-        gradeData.unshift(itemPayload);
-        showToast('新成績登記成功！', 'check-circle');
+        payload.createdAt = Date.now();
+        gradeRecords.unshift(payload);
+        showToast('新成績已順利登記！', 'check-circle');
       }
 
-      saveData();
+      saveDatabase();
       closeModal();
       renderAll();
     }
 
-    // Delete Record
-    function deleteGrade(id) {
-      const item = gradeData.find(d => d.id === id);
+    // 8. CUSTOM SAFE DELETE MODAL (No window.confirm)
+    function triggerDelete(id) {
+      const item = gradeRecords.find(r => r.id === id);
       if (!item) return;
 
-      // Custom message box simulation
-      if (window.confirm(`確定要刪除「${item.name}」的成績紀錄嗎？`)) {
-        gradeData = gradeData.filter(d => d.id !== id);
-        saveData();
-        renderAll();
-        showToast(`已刪除 ${item.name} 之成績`, 'trash');
-      }
+      deleteTargetId = id;
+      document.getElementById('deleteModalTargetText').innerText = `您即將刪除「${item.name} (${item.grade})」的這筆 ${item.examType} 成績紀錄。`;
+      document.getElementById('confirmDeleteBtn').onclick = executeDelete;
+      document.getElementById('deleteModal').classList.remove('hidden');
+      lucide.createIcons();
     }
 
-    // LINE Notification Modal & Generator
-    let currentLineText = '';
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.add('hidden');
+      deleteTargetId = null;
+    }
 
+    function executeDelete() {
+      if (!deleteTargetId) return;
+      gradeRecords = gradeRecords.filter(r => r.id !== deleteTargetId);
+      saveDatabase();
+      closeDeleteModal();
+      renderAll();
+      showToast('紀錄已安全刪除', 'trash');
+    }
+
+    // 9. LINE NOTIFICATION GENERATOR
     function openLineModal(id) {
-      const item = gradeData.find(d => d.id === id);
+      const item = gradeRecords.find(r => r.id === id);
       if (!item) return;
 
       const isJunior = item.division === 'junior';
       const subName1 = isJunior ? '國文' : '國語';
+      const subName4 = isJunior ? '自然' : '自然/生活';
 
       let honorsHighlight = '';
       if (isJunior) {
-        if (item.schoolRank) honorsHighlight += `🏆 原校全校排名：第 ${item.schoolRank} 名 (全年級 ${item.schoolTotal || '-'} 人)\n`;
-        if (item.classRank) honorsHighlight += `🌟 班級排名：第 ${item.classRank} 名\n`;
-      } else {
-        if (item.award && item.award.startsWith('是')) {
-          honorsHighlight += `🎉 學校榮譽：榮獲【${item.award.replace('是 - ', '')}】\n`;
+        if (item.schoolRank) {
+          honorsHighlight += `🏆 原校全校排名：第 ${item.schoolRank} 名${item.schoolTotal ? ` (全年級 ${item.schoolTotal} 人)` : ''}\n`;
         }
-        if (item.classRank) honorsHighlight += `🌟 班級排名：第 ${item.classRank} 名\n`;
+        if (item.classRank) {
+          honorsHighlight += `🌟 班級排名：第 ${item.classRank} 名${item.classTotal ? ` (全班 ${item.classTotal} 人)` : ''}\n`;
+        }
+      } else {
+        if (item.hasAward || (item.award && item.award.startsWith('是'))) {
+          const t = item.awardType || (item.award ? item.award.replace('是 - ', '') : '榮譽獎狀');
+          honorsHighlight += `🎖️ 學校獎狀榮譽：榮獲【${t}】\n`;
+        }
+        if (item.classRank) {
+          honorsHighlight += `🌟 班級排名：第 ${item.classRank} 名\n`;
+        }
       }
 
-      const text = `【斗六顧德文理補習班 • 學生段考成果通知】
+      // Check full scores
+      const perfects = [];
+      const titles = [subName1, '英文', '數學', subName4, '社會'];
+      const rawScores = [item.scores.sub1, item.scores.sub2, item.scores.sub3, item.scores.sub4, item.scores.sub5];
+      rawScores.forEach((score, idx) => {
+        if (Number(score) === 100) perfects.push(titles[idx]);
+      });
+      if (perfects.length > 0) {
+        honorsHighlight += `💯 滿分喝采：【${perfects.join('、')}】榮獲 100 分滿分！\n`;
+      }
+
+      const text = `【斗六顧德文理補習班 • 學生段考成果喜訊】
 
 親愛的 ${item.name} 家長您好：
-恭喜孩子完成本次【${item.examType}】！在顧德老師們的輔導與孩子自身的勤勉用功下，本次考試成績表現優異，特向您報喜：
+向您報喜！孩子本次在校【${item.examType}】各科成績表現非常認真亮眼，在顧德老師們的悉心指導與孩子踏實的努力下，展現了極佳的學習成果：
 
-📚 學員：${item.name} (${item.grade})
-🏫 原校班級：${item.schoolClass || '斗六就讀學校'}
+🎓 學員：${item.name} (${item.grade})
+🏫 就讀學校：${item.schoolClass || '斗六在地學校'}
 ---------------------------
-📊 各科成績明細：
+📊 各科段考成績：
 • ${subName1}：${item.scores.sub1 ?? '無'} 分
 • 英文：${item.scores.sub2 ?? '無'} 分
 • 數學：${item.scores.sub3 ?? '無'} 分
-• 自然：${item.scores.sub4 ?? '無'} 分
+• ${subName4}：${item.scores.sub4 ?? '無'} 分
 • 社會：${item.scores.sub5 ?? '無'} 分
 ---------------------------
 📈 總分：${item.total} 分
 🎯 平均：${Number(item.avg).toFixed(1)} 分
 ${honorsHighlight}
 💬 顧德老師評語與叮嚀：
-「${item.comments || '孩子在補習班上課極具專注力，解題觀念清晰，表現非常值得嘉許！請家長在家中也給予孩子大大的擁抱與鼓勵！'}」
+「${item.comments || '孩子在補習班上課極具專注力，解題觀念清晰敏捷，表現非常令人讚賞！請家長在家中也給予孩子一個大大的鼓勵！'}」
 
 顧德補習班團隊將持續陪伴孩子穩紮穩打、再創佳績！
-斗六顧德文理補習班 教學團隊 敬上`;
+斗六顧德文理補習班 教學考評部 敬上`;
 
-      currentLineText = text;
-      document.getElementById('lineMessageContent').innerText = text;
-      document.getElementById('copyBtnText').innerText = '複製通知訊息';
-      document.getElementById('lineModal').classList.remove('hidden');
+      currentGeneratedLineText = text;
+      document.getElementById('lineMessageArea').innerText = text;
+      document.getElementById('copyDraftBtnText').innerText = '複製到剪貼簿';
+      document.getElementById('lineDraftModal').classList.remove('hidden');
       lucide.createIcons();
     }
 
     function closeLineModal() {
-      document.getElementById('lineModal').classList.add('hidden');
+      document.getElementById('lineDraftModal').classList.add('hidden');
     }
 
-    function copyLineMessage() {
-      // Using standard text copy
-      const textArea = document.createElement("textarea");
-      textArea.value = currentLineText;
-      document.body.appendChild(textArea);
-      textArea.select();
+    function copyLineDraft() {
+      const area = document.createElement('textarea');
+      area.value = currentGeneratedLineText;
+      document.body.appendChild(area);
+      area.select();
       try {
         document.execCommand('copy');
-        document.getElementById('copyBtnText').innerText = '已複製到剪貼簿！';
-        showToast('LINE報喜訊息已複製，可直接貼至LINE！', 'check-circle');
+        document.getElementById('copyDraftBtnText').innerText = '已成功複製！';
+        showToast('LINE 報喜訊息已複製至剪貼簿！', 'check-circle');
       } catch (err) {
-        showToast('複製失敗，請手動複製文字框內容', 'alert-circle');
+        showToast('複製失敗，請手動圈選文字複製', 'alert-circle');
       }
-      document.body.removeChild(textArea);
+      document.body.removeChild(area);
     }
 
-    // Export to CSV
+    // 10. EXPORT TO CSV
     function exportToCSV() {
-      if (gradeData.length === 0) {
-        showToast('目前尚無任何成績紀錄可供匯出', 'info');
+      if (gradeRecords.length === 0) {
+        showToast('目前尚無資料可匯出', 'alert-circle');
         return;
       }
 
-      let csv = '\uFEFF'; // UTF-8 BOM
-      csv += '學制,姓名,年級,學校與班級,考試別,學期,科目1,英文,數學,自然,社會,總分,平均,班級名次,全校名次/獎狀,老師評語\n';
+      let csv = '\uFEFF'; // UTF-8 BOM for Excel
+      csv += '學制,姓名,年級,學校與班級,考試別,學期,科目1,英語,數學,自然,社會,總分,平均,班級名次,全校排名/獎狀,老師評語\n';
 
-      gradeData.forEach(d => {
-        const isJunior = d.division === 'junior';
+      gradeRecords.forEach(r => {
+        const isJunior = r.division === 'junior';
         const rankOrAward = isJunior 
-          ? (d.schoolRank ? `全校第${d.schoolRank}名` : '')
-          : (d.award || '');
+          ? (r.schoolRank ? `全校第${r.schoolRank}名` : '')
+          : (r.awardType || (r.hasAward ? '獲頒獎狀' : '無'));
 
         const row = [
           isJunior ? '國中部' : '國小部',
-          cleanCsvCell(d.name),
-          cleanCsvCell(d.grade),
-          cleanCsvCell(d.schoolClass),
-          cleanCsvCell(d.examType),
-          cleanCsvCell(d.semester),
-          d.scores.sub1 ?? '',
-          d.scores.sub2 ?? '',
-          d.scores.sub3 ?? '',
-          d.scores.sub4 ?? '',
-          d.scores.sub5 ?? '',
-          d.total,
-          Number(d.avg).toFixed(1),
-          d.classRank ? `第${d.classRank}名` : '',
-          cleanCsvCell(rankOrAward),
-          cleanCsvCell(d.comments)
+          cleanCsv(r.name),
+          cleanCsv(r.grade),
+          cleanCsv(r.schoolClass),
+          cleanCsv(r.examType),
+          cleanCsv(r.semester),
+          r.scores.sub1 ?? '',
+          r.scores.sub2 ?? '',
+          r.scores.sub3 ?? '',
+          r.scores.sub4 ?? '',
+          r.scores.sub5 ?? '',
+          r.total,
+          Number(r.avg).toFixed(1),
+          r.classRank ? `第${r.classRank}名` : '',
+          cleanCsv(rankOrAward),
+          cleanCsv(r.comments)
         ];
         csv += row.join(',') + '\n';
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `斗六顧德補習班_成績登記總表_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `斗六顧德補習班_學生成績登記表_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-      showToast('成績總表 CSV 匯出完成！', 'download');
+      showToast('CSV 匯出成功，可用 Excel 開啟！', 'file-spreadsheet');
     }
 
-    function cleanCsvCell(val) {
+    function cleanCsv(val) {
       if (!val) return '""';
       return `"${String(val).replace(/"/g, '""')}"`;
     }
 
-    // Utility Toast System
-    let toastTimeout = null;
+    // 11. TOAST SYSTEM
+    let toastTimer = null;
     function showToast(msg, icon = 'check-circle') {
       const toast = document.getElementById('toast');
       const toastMsg = document.getElementById('toastMsg');
@@ -1525,14 +1731,14 @@ ${honorsHighlight}
       toast.classList.remove('translate-y-20', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
 
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-20', 'opacity-0');
       }, 3000);
     }
 
-    // Escape HTML to prevent injection
+    // Utility
     function escapeHtml(text) {
       if (!text) return '';
       return String(text)
