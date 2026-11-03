@@ -3,251 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>斗六顧德補習班 - 智慧教務管理與成績總庫</title>
+    <title>斗六顧德補習班 - 老師專用雲端成績登記系統</title>
     
     <style>
         :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --purple: #8e44ad;
-            --bg: #f4f6f9;
-            --border: #ccd1d9;
-            --tab-height: 64px;
+            --primary: #1e293b;
+            --accent: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --purple: #7c3aed;
+            --bg: #f1f5f9;
+            --border: #cbd5e1;
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #333; font-size: 15px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #334155; font-size: 15px; padding-bottom: 60px; }
 
+        /* 頂部導覽列 */
         header {
-            background: var(--primary); color: white; padding: 14px 18px;
+            background: var(--primary); color: white; padding: 14px 20px;
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
-        .header-title h2 { margin: 0; font-size: 19px; letter-spacing: 0.5px; }
-        .header-title p { margin: 3px 0 0; font-size: 12px; opacity: 0.85; line-height: 1.4; }
+        .header-title h2 { margin: 0; font-size: 20px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        .header-title p { margin: 3px 0 0; font-size: 12px; opacity: 0.8; }
 
-        .sync-controls { display: flex; align-items: center; gap: 10px; width: 100%; justify-content: flex-end; }
-        .nav-link { color: white; text-decoration: none; font-size: 13px; background: rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 20px; font-weight: bold; display: inline-block; }
-        .nav-link:hover { background: rgba(255,255,255,0.35); }
+        .sync-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-link { color: white; text-decoration: none; font-size: 13px; background: rgba(255,255,255,0.15); padding: 7px 14px; border-radius: 20px; font-weight: bold; transition: 0.2s; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
+        .nav-link:hover { background: rgba(255,255,255,0.28); }
 
-        .container { max-width: 1420px; margin: 15px auto; padding: 0 12px; }
+        .container { max-width: 1440px; margin: 20px auto; padding: 0 14px; }
 
-        /* 手機版：底部固定導覽列 */
-        @media(max-width: 767px) {
-            body { padding-bottom: calc(var(--tab-height) + env(safe-area-inset-bottom, 20px) + 15px) !important; }
-            .tabs {
-                position: fixed; bottom: 0; left: 0; width: 100%;
-                height: calc(var(--tab-height) + env(safe-area-inset-bottom, 0px));
-                background: #ffffff; border-top: 1px solid #e2e8f0;
-                box-shadow: 0 -4px 15px rgba(0,0,0,0.08); z-index: 999;
-                display: flex; justify-content: space-around; align-items: flex-start;
-                padding: 6px 2px env(safe-area-inset-bottom, 6px); margin: 0; gap: 2px;
-                overflow-x: auto;
-            }
-            .tab-btn {
-                flex: 0 0 auto; min-width: 65px; height: 52px; font-size: 10px; padding: 4px 1px;
-                border-radius: 8px; background: transparent; color: #64748b;
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-                gap: 2px; border: none; line-height: 1.1; font-weight: 600; transition: all 0.2s ease;
-            }
-            .tab-btn .tab-icon { font-size: 16px; line-height: 1; }
-            .tab-btn.active { background: #eff6ff; color: #2563eb; font-weight: bold; }
-            .tab-btn.active .tab-icon { transform: scale(1.1); }
+        /* 主分頁切換按鈕 */
+        .tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; background: white;
+            padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
+        .tab-btn {
+            flex: 1; padding: 12px 16px; border: 2px solid transparent; border-radius: 8px;
+            background: #f8fafc; font-size: 15px; font-weight: bold; cursor: pointer;
+            color: #475569; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .tab-btn:hover { background: #e2e8f0; color: var(--primary); }
+        .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
 
-        /* 網頁版：上方按鈕切換列 */
+        /* 卡片與網格 */
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 18px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
         @media(min-width: 768px) {
-            body { padding-bottom: 40px; }
-            .tabs {
-                display: flex; gap: 12px; margin-bottom: 22px; background: white;
-                padding: 10px; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-            }
-            .tab-btn {
-                flex: 1; padding: 13px 12px; border: 2px solid #e2e8f0; border-radius: 10px;
-                background: #f8fafc; font-size: 14px; font-weight: bold; cursor: pointer;
-                color: var(--primary); transition: 0.2s; display: flex; align-items: center;
-                justify-content: center; gap: 6px;
-            }
-            .tab-btn:hover { background: #f1f5f9; border-color: var(--accent); }
-            .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.35); }
-            .tab-btn .tab-icon { font-size: 15px; }
-            .sync-controls { width: auto; }
-            .container { padding: 0 15px; margin: 25px auto; }
-            header { padding: 16px 24px; }
-            .header-title h2 { font-size: 22px; }
+            .grid-2 { grid-template-columns: 1fr 1fr; }
+            .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
         }
 
-        .card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 15px; }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-
-        .btn { padding: 9px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
-        .btn-purple { background: var(--purple); color: white; }
-        .btn-outline { background: white; color: var(--accent); border: 1.5px solid var(--accent); }
-        .btn:hover { opacity: 0.9; }
-
-        input[type="text"], input[type="date"], input[type="number"], select {
-            width: 100%; padding: 10px 12px; margin-top: 4px; margin-bottom: 10px;
-            border: 1px solid var(--border); border-radius: 6px; font-size: 15px; background: #fff;
+        /* 表單元件 */
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; background: #fff; transition: 0.2s;
         }
+        input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 
         .select-styled {
-            font-weight: 600; color: var(--primary); border: 2px solid #cbd5e1; cursor: pointer;
+            font-weight: 700; color: var(--primary); cursor: pointer;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat; background-position: right 12px center; appearance: none; padding-right: 36px !important;
         }
-        .select-styled:focus { border-color: var(--accent); outline: none; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { border: 1px solid var(--border); padding: 8px 6px; text-align: center; vertical-align: middle; }
-        th { background: #f1f3f5; color: var(--primary); font-weight: bold; }
+        /* 按鈕 */
+        .btn { padding: 9px 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: #000; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-outline { background: white; color: #475569; border: 1.5px solid #cbd5e1; }
+        .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
 
-        #toastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast-message { color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: bold; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; }
+        /* 表格樣式 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px 8px; text-align: center; vertical-align: middle; }
+        th { background: #f8fafc; color: var(--primary); font-weight: 800; white-space: nowrap; }
+        tbody tr:hover { background-color: #f8fafc; }
 
-        .score-input { width: 55px !important; padding: 6px !important; text-align: center; font-weight: bold; }
-        .rank-input { width: 55px !important; padding: 6px !important; text-align: center; }
-        .avg-cell { font-weight: bold; color: #b91c1c; background: #fff5f5; }
-        
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; margin-top: 4px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--success); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        .score-input { width: 68px !important; padding: 7px 4px !important; text-align: center; font-weight: 800; font-size: 15px !important; color: #1e293b; }
+        .score-input.full-mark { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+        .rank-input { width: 62px !important; padding: 7px 4px !important; text-align: center; font-weight: bold; color: #334155; }
+        .total-cell { font-weight: 800; color: #1e3a8a; background: #eff6ff; font-size: 15px; }
+        .avg-cell { font-weight: 800; color: #b91c1c; background: #fef2f2; font-size: 15px; }
 
-        /* 🌟 學生金色紅榜專屬特效 */
+        /* 🌟 學生金色紅榜特效 */
         .name-gold {
             color: #d97706 !important;
             font-weight: 900 !important;
-            text-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+            text-shadow: 0 0 8px rgba(245, 158, 11, 0.45);
             font-size: 16px;
+            background: linear-gradient(90deg, #fffbeb, #fef3c7);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1.5px solid #f59e0b;
+            display: inline-block;
         }
         .name-gold::after {
             content: ' 🏆';
             font-size: 14px;
-            animation: bounce 1s infinite alternate;
+            animation: bounce 0.9s infinite alternate;
             display: inline-block;
         }
         @keyframes bounce {
             from { transform: translateY(0px); }
             to { transform: translateY(-3px); }
         }
+
+        /* 獎狀開關 Switch */
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* 設定區塊標籤清單 */
+        .setting-box { background: #f8fafc; padding: 16px; border-radius: 10px; border: 1.5px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; }
+        .setting-box h4 { font-size: 15px; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; max-height: 240px; overflow-y: auto; padding: 2px; }
+        .tag-item {
+            background: white; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 10px;
+            font-size: 13.5px; font-weight: bold; color: #1e293b; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .tag-item button {
+            background: #fee2e2; color: #dc2626; border: none; border-radius: 4px; width: 20px; height: 20px;
+            font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .tag-item button:hover { background: #dc2626; color: white; }
+
+        /* 登入畫面遮罩 */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            z-index: 9000; display: flex; justify-content: center; align-items: center; padding: 15px;
+        }
+        .login-card {
+            background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 32px 26px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.35); text-align: center; border-top: 6px solid var(--warning);
+        }
+
+        /* Toast 通知 */
+        #toastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast-message { color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); font-size: 14px; font-weight: bold; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; }
     </style>
 </head>
 <body>
 
 <div id="toastContainer"></div>
 
+<!-- 老師登入遮罩 -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <div style="font-size: 40px; margin-bottom: 8px;">🏫</div>
+        <h2 style="color: var(--primary); font-size: 22px; margin-bottom: 4px;">斗六顧德補習班</h2>
+        <p style="color: #64748b; font-size: 13.5px; margin-bottom: 24px;">老師專用雲端成績登記系統</p>
+        
+        <div style="text-align: left; margin-bottom: 14px;">
+            <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 6px;">👨‍🏫 選擇登入老師：</label>
+            <select id="loginTeacherSelect" class="select-styled"></select>
+        </div>
+
+        <div style="text-align: left; margin-bottom: 22px;">
+            <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 6px;">🔑 輸入通行 PIN 碼（預設 1234 或 8888）：</label>
+            <input type="password" id="loginPinInput" placeholder="••••" maxlength="8" style="text-align: center; font-size: 20px; letter-spacing: 6px; font-weight: bold;" onkeydown="if(event.key==='Enter') handleLogin()">
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 13px; font-size: 16px;" onclick="handleLogin()">🚀 登入成績系統</button>
+    </div>
+</div>
+
 <header>
     <div class="header-title">
-        <h2>斗六顧德補習班 智慧教務與點名系統</h2>
-        <p>全校學籍中央控制總庫 ｜ 支援單一生多科跨班選課與自訂到班星期 ｜ 課輔部、國小部、國中部連動</p>
+        <h2>🏆 斗六顧德補習班 雲端成績管理系統</h2>
+        <p>目前登入：<b id="currentTeacherDisplay" style="color: #fde047;">未登入</b> ｜ 滿分或平均 90 分以上自動晉升金色榮譽榜</p>
     </div>
-    <div class="sync-controls no-print">
-        <span id="syncStatusIndicator" style="font-size:12px; background:rgba(46,204,113,0.2); color:#2ecc71; padding:4px 10px; border-radius:12px; font-weight:bold; transition:all 0.3s;">☁️ 雲端同步就緒</span>
-        <a href="https://share-dgood2.vercel.app/gogogood.html" class="nav-link">🔙 返回行政系統</a>
+    <div class="sync-controls">
+        <span id="syncStatusIndicator" style="font-size:12px; background:rgba(46,204,113,0.2); color:#2ecc71; padding:5px 12px; border-radius:12px; font-weight:bold;">☁️ 雲端連線中...</span>
+        <a href="https://share-dgood2.vercel.app/gogogood.html" class="nav-link">🔙 返回點名與教務系統</a>
+        <button class="nav-link" onclick="handleLogout()">🚪 登出</button>
     </div>
 </header>
 
 <div class="container">
-    <div class="tabs no-print">
-        <button class="tab-btn" onclick="switchTab('rollcall')">
-            <span class="tab-icon">📱</span><span>今日點名</span>
+    <!-- 頂部切換列 -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tabBtn_scores" onclick="switchTab('scores')">
+            <span>💯</span><span>成績登記與排名</span>
         </button>
-        <button class="tab-btn" onclick="switchTab('absent-alert')">
-            <span class="tab-icon">🚨</span><span>還沒點名</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab('sheet')">
-            <span class="tab-icon">🖨️</span><span>點名表</span>
-        </button>
-        <button class="tab-btn active" onclick="switchTab('scores')">
-            <span class="tab-icon">💯</span><span>成績登記</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab('course-config')">
-            <span class="tab-icon">⚙️</span><span>課程排程</span>
-        </button>
-        <button class="tab-btn" onclick="switchTab('students-master')">
-            <span class="tab-icon">👥</span><span>學生總覽</span>
+        <button class="tab-btn" id="tabBtn_settings" onclick="switchTab('settings')">
+            <span>⚙️</span><span>系統設定（科目 / 年次 / 班級 / 老師）</span>
         </button>
     </div>
 
-    <!-- 佔位區塊 (保留原本的介面結構) -->
-    <div id="tab-rollcall" style="display:none;"><div class="card"><h3>📅 點名系統 UI 保留區塊</h3></div></div>
-    <div id="tab-absent-alert" style="display:none;"><div class="card"><h3>🚨 未到提醒 UI 保留區塊</h3></div></div>
-    <div id="tab-sheet" style="display:none;"><div class="card"><h3>🖨️ 點名表 UI 保留區塊</h3></div></div>
-    <div id="tab-students-master" style="display:none;"><div class="card"><h3>👥 學生總覽 UI 保留區塊</h3></div></div>
-
-    <!-- 💯 成績登記分頁 -->
-    <div id="tab-scores" style="display:block;">
-        <div class="card">
-            <h3 style="color:var(--primary); font-size:17px; margin-bottom:12px;">💯 班級成績登記與排名</h3>
-            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:10px;">
-                <div style="flex:1; min-width:150px;">
-                    <label style="font-size:13px; font-weight:bold;">📅 學年度與學期：</label>
+    <!-- ========================================== -->
+    <!-- 分頁 1：成績登記與排名專區                   -->
+    <!-- ========================================== -->
+    <div id="tab-scores">
+        <div class="card" style="border-top: 4px solid var(--accent);">
+            <div class="grid-3">
+                <div>
+                    <label style="font-size:13px; font-weight:bold; color:var(--primary); display:block; margin-bottom:6px;">📅 1. 選擇學年度 / 年次：</label>
                     <select id="scoreYear" class="select-styled" onchange="renderScoreTable()"></select>
                 </div>
-                <div style="flex:1; min-width:150px;">
-                    <label style="font-size:13px; font-weight:bold;">📝 考試類別：</label>
+                <div>
+                    <label style="font-size:13px; font-weight:bold; color:var(--primary); display:block; margin-bottom:6px;">📝 2. 選擇考試類別：</label>
                     <select id="scoreExam" class="select-styled" onchange="renderScoreTable()"></select>
                 </div>
-                <div style="flex:1; min-width:150px;">
-                    <label style="font-size:13px; font-weight:bold;">🏫 選擇登記班級：</label>
+                <div>
+                    <label style="font-size:13px; font-weight:bold; color:var(--primary); display:block; margin-bottom:6px;">🏫 3. 選擇要登記的班級：</label>
                     <select id="scoreCourse" class="select-styled" onchange="renderScoreTable()"></select>
                 </div>
             </div>
         </div>
-        
+
         <div class="card" style="overflow-x:auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3 id="scoreTableTitle" style="color:var(--primary); font-size:16px;">請先選擇上方班級</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:12px;">
+                <div>
+                    <h3 id="scoreTableTitle" style="color:var(--primary); font-size:18px;">請選擇上方班級載入學生名單</h3>
+                    <p id="scoreTableSub" style="font-size:12.5px; color:#64748b; margin-top:3px;">分數輸入後系統將自動計算總分與平均，並於 1.2 秒後自動同步至雲端。</p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button class="btn btn-outline" onclick="switchTab('settings')">⚙️ 修改科目或班級</button>
+                    <button class="btn btn-primary" onclick="exportScoreCSV()">📥 匯出此班成績 Excel (CSV)</button>
+                    <button class="btn btn-success" onclick="forceSaveScores()">💾 立即手動存檔</button>
+                </div>
             </div>
+
             <div id="scoreTableContainer">
-                <p style="text-align:center; color:#94a3b8; padding:30px;">等待選擇班級以載入學生名單...</p>
+                <p style="text-align:center; color:#94a3b8; padding:40px 20px;">請先從上方下拉選單選擇「登記班級」...</p>
             </div>
         </div>
     </div>
 
-    <!-- ⚙️ 系統設定分頁 -->
-    <div id="tab-course-config" style="display:none;">
-        <div class="card">
-            <h3 style="color:var(--primary); font-size:17px;">⚙️ 課程排程保留區塊</h3>
-        </div>
-
-        <!-- 成績系統參數設定區 -->
+    <!-- ========================================== -->
+    <!-- 分頁 2：系統設定專區 (直接於網頁動態增刪)    -->
+    <!-- ========================================== -->
+    <div id="tab-settings" style="display:none;">
+        
+        <!-- 第一排：科目動態設定 (國中科目 vs 國小科目) -->
         <div class="card" style="border-top: 4px solid var(--purple);">
-            <h3 style="color:var(--primary); font-size:17px; margin-bottom:12px;">🏆 成績系統參數設定 (學年度 / 考試類別)</h3>
+            <div style="margin-bottom: 14px;">
+                <h3 style="color:var(--primary); font-size:18px;">📚 考試科目自訂管理（直接連動成績表格欄位）</h3>
+                <p style="font-size:13px; color:#64748b; margin-top:2px;">您可以自由新增或刪除國中與國小的登記科目，切回「成績登記」時表格欄位會立即更新。</p>
+            </div>
+
             <div class="grid-2">
-                <!-- 學年度管理 -->
-                <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:14px; margin-bottom:10px; color:#4c1d95;">📅 學年度/學期管理</h4>
-                    <div style="display:flex; gap:8px; margin-bottom:12px;">
-                        <input type="text" id="newYearInput" placeholder="例如：113學年度 下學期" style="margin:0;">
-                        <button class="btn btn-purple" onclick="addGeneralSetting('years', 'newYearInput')">新增</button>
+                <!-- 國中部科目 -->
+                <div class="setting-box">
+                    <div>
+                        <h4>
+                            <span>📙 國中部 考試科目</span>
+                            <span style="font-size:12px; color:#64748b; font-weight:normal;">包含班排 / 校排欄位</span>
+                        </h4>
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            <input type="text" id="newJuniorSubInput" placeholder="輸入新科目名稱 (例：理化、地科)" onkeydown="if(event.key==='Enter') addSubject('juniorSubjects', 'newJuniorSubInput')">
+                            <button class="btn btn-purple" onclick="addSubject('juniorSubjects', 'newJuniorSubInput')">➕ 新增科目</button>
+                        </div>
+                        <div id="juniorSubList" class="tag-list"></div>
                     </div>
-                    <div id="yearListDiv" style="font-size:13px; display:flex; flex-direction:column; gap:6px;"></div>
                 </div>
-                
-                <!-- 考試類別管理 -->
-                <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:14px; margin-bottom:10px; color:#4c1d95;">📝 考試類別管理</h4>
-                    <div style="display:flex; gap:8px; margin-bottom:12px;">
-                        <input type="text" id="newExamInput" placeholder="例如：期中考" style="margin:0;">
-                        <button class="btn btn-purple" onclick="addGeneralSetting('exams', 'newExamInput')">新增</button>
+
+                <!-- 國小/安親部科目 -->
+                <div class="setting-box">
+                    <div>
+                        <h4>
+                            <span>📘 國小部 / 課輔安親 考試科目</span>
+                            <span style="font-size:12px; color:#64748b; font-weight:normal;">包含名次 / 獎狀開關</span>
+                        </h4>
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            <input type="text" id="newElemSubInput" placeholder="輸入新科目名稱 (例：生活、聽寫)" onkeydown="if(event.key==='Enter') addSubject('elemSubjects', 'newElemSubInput')">
+                            <button class="btn btn-purple" onclick="addSubject('elemSubjects', 'newElemSubInput')">➕ 新增科目</button>
+                        </div>
+                        <div id="elemSubList" class="tag-list"></div>
                     </div>
-                    <div id="examListDiv" style="font-size:13px; display:flex; flex-direction:column; gap:6px;"></div>
                 </div>
             </div>
         </div>
+
+        <!-- 第二排：學年度/年次、考試類別、登入老師設定 -->
+        <div class="card" style="border-top: 4px solid var(--warning);">
+            <div style="margin-bottom: 14px;">
+                <h3 style="color:var(--primary); font-size:18px;">📅 學年度（年次）、考試名稱與登入老師設定</h3>
+                <p style="font-size:13px; color:#64748b; margin-top:2px;">在網頁上直接新增學年度、考試項目或任課老師名單，所有裝置即時同步。</p>
+            </div>
+
+            <div class="grid-3">
+                <!-- 學年度/年次 -->
+                <div class="setting-box">
+                    <div>
+                        <h4><span>📅 學年度 / 年次設定</span></h4>
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            <input type="text" id="newYearInput" placeholder="例：114學年度 上學期" onkeydown="if(event.key==='Enter') addGeneralItem('years', 'newYearInput')">
+                            <button class="btn btn-primary" onclick="addGeneralItem('years', 'newYearInput')">➕ 新增</button>
+                        </div>
+                        <div id="yearListDiv" class="tag-list"></div>
+                    </div>
+                </div>
+
+                <!-- 考試類別 -->
+                <div class="setting-box">
+                    <div>
+                        <h4><span>📝 考試類別設定</span></h4>
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            <input type="text" id="newExamInput" placeholder="例：第一次段考、模擬考" onkeydown="if(event.key==='Enter') addGeneralItem('exams', 'newExamInput')">
+                            <button class="btn btn-primary" onclick="addGeneralItem('exams', 'newExamInput')">➕ 新增</button>
+                        </div>
+                        <div id="examListDiv" class="tag-list"></div>
+                    </div>
+                </div>
+
+                <!-- 老師名單 -->
+                <div class="setting-box">
+                    <div>
+                        <h4><span>👨‍🏫 登入老師名單設定</span></h4>
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            <input type="text" id="newTeacherInput" placeholder="例：張老師、Bonnie" onkeydown="if(event.key==='Enter') addGeneralItem('teachers', 'newTeacherInput')">
+                            <button class="btn btn-primary" onclick="addGeneralItem('teachers', 'newTeacherInput')">➕ 新增</button>
+                        </div>
+                        <div id="teacherListDiv" class="tag-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三排：補習班班級設定管理 (國中部 / 國小部 / 課輔安親班) -->
+        <div class="card" style="border-top: 4px solid var(--success);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                <div>
+                    <h3 style="color:var(--primary); font-size:18px;">🏫 補習班班級設定管理（與點名系統雲端雙向同步）</h3>
+                    <p style="font-size:13px; color:#64748b; margin-top:2px;">在此新增或管理「國中部」、「國小部」、「課輔部(安親班)」的班級，會直接寫入雲端 `courses` 資料表。</p>
+                </div>
+            </div>
+
+            <!-- 快速新增班級列 -->
+            <div style="background:#f0fdf4; border:1.5px solid #86efac; padding:14px; border-radius:10px; margin-bottom:16px;">
+                <div style="font-weight:bold; color:#166534; font-size:14px; margin-bottom:8px;">➕ 快速新增班級：</div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:center;">
+                    <select id="newClassDept" class="select-styled">
+                        <option value="junior">📙 國中部</option>
+                        <option value="elementary">📘 國小部</option>
+                        <option value="care">🏢 課輔部 (安親班)</option>
+                    </select>
+                    <input type="text" id="newClassName" placeholder="班級名稱 (例：國一數學先修A班)">
+                    <input type="text" id="newClassTeacher" placeholder="授課老師 (例：王老師)">
+                    <input type="text" id="newClassTime" placeholder="上課時段 (例：18:30-20:30)">
+                    <button class="btn btn-success" onclick="addNewCourseClass()">➕ 確認新增班級</button>
+                </div>
+            </div>
+
+            <!-- 三大部門班級列表 -->
+            <div class="grid-3">
+                <div class="setting-box">
+                    <h4><span>📙 國中部班級</span><span id="count_junior" style="font-size:12px; color:#64748b;">0 班</span></h4>
+                    <div id="classList_junior" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                </div>
+                <div class="setting-box">
+                    <h4><span>📘 國小部班級</span><span id="count_elementary" style="font-size:12px; color:#64748b;">0 班</span></h4>
+                    <div id="classList_elementary" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                </div>
+                <div class="setting-box">
+                    <h4><span>🏢 課輔部 (安親班)</span><span id="count_care" style="font-size:12px; color:#64748b;">0 班</span></h4>
+                    <div id="classList_care" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第四排：若班級尚無學生，提供快速新增學生至該班 -->
+        <div class="card" style="border-top: 4px solid var(--accent);">
+            <h3 style="color:var(--primary); font-size:18px; margin-bottom:4px;">👤 快速新增學生至班級（同步寫入全校學籍總庫）</h3>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">若新開的班級還沒有學生，可直接在這裡快速新增學生並綁定班級与就讀學校。</p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:center; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #cbd5e1;">
+                <input type="text" id="quickStuName" placeholder="學生姓名 (例：林小宇)">
+                <input type="text" id="quickStuSchool" placeholder="就讀學校 (例：斗六國中 / 公誠國小)">
+                <select id="quickStuCourse" class="select-styled"></select>
+                <button class="btn btn-primary" onclick="quickAddStudent()">➕ 新增學生並加入班級</button>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script type="module">
-    // Firebase 連線
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -263,67 +406,99 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 全域狀態
+    const DEFAULT_GENERAL = {
+        years: ['113學年度 上學期', '113學年度 下學期', '114學年度 上學期', '114學年度 下學期'],
+        exams: ['第一次段考', '第二次段考', '第三次段考', '期中評量', '期末評量', '模擬考', '平時測驗'],
+        teachers: ['吳主任', '閔兒老師', '冠慧老師', '珮禎老師', '王老師', 'Alice', 'Bonnie', 'Eva', 'Jennifer', 'Sarah', 'Shao'],
+        juniorSubjects: ['國文', '英文', '數學', '自然', '社會'],
+        elemSubjects: ['國語', '英文', '數學', '自然', '社會']
+    };
+
     window.state = {
+        currentTeacher: localStorage.getItem('gude_score_teacher') || '',
         courses: { care: [], elementary: [], junior: [] },
         students: [],
         scores: {},
-        generalSettings: {
-            years: ['113學年度 上學期', '113學年度 下學期'],
-            exams: ['第一次段考', '第二次段考', '第三次段考', '平時考']
-        }
+        generalSettings: JSON.parse(JSON.stringify(DEFAULT_GENERAL))
     };
-    
+
     let scoreSyncTimer = null;
 
+    // --- Toast 訊息 ---
     window.showToast = function(msg, type = 'success') {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = 'toast-message';
-        toast.style.background = type === 'success' ? '#2ecc71' : (type === 'error' ? '#e74c3c' : '#f39c12');
+        toast.style.background = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
         toast.innerHTML = msg;
         container.appendChild(toast);
         requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; });
         setTimeout(() => {
             toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)';
             setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 2800);
     };
 
     window.updateSyncIndicator = function(status, text) {
-        const indicator = document.getElementById('syncStatusIndicator');
-        if (!indicator) return;
-        indicator.innerText = text;
+        const ind = document.getElementById('syncStatusIndicator');
+        if (!ind) return;
+        ind.innerText = text;
         if (status === 'success') {
-            indicator.style.background = 'rgba(46,204,113,0.2)'; indicator.style.color = '#2ecc71';
+            ind.style.background = 'rgba(16,185,129,0.2)'; ind.style.color = '#34d399';
         } else if (status === 'syncing') {
-            indicator.style.background = 'rgba(241,196,15,0.2)'; indicator.style.color = '#f39c12';
+            ind.style.background = 'rgba(245,158,11,0.25)'; ind.style.color = '#fbbf24';
         } else {
-            indicator.style.background = 'rgba(231,76,60,0.2)'; indicator.style.color = '#e74c3c';
-        }
-    }
-
-    window.switchTab = function(tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-rollcall').style.display = tab === 'rollcall' ? 'block' : 'none';
-        document.getElementById('tab-absent-alert').style.display = tab === 'absent-alert' ? 'block' : 'none';
-        document.getElementById('tab-sheet').style.display = tab === 'sheet' ? 'block' : 'none';
-        document.getElementById('tab-scores').style.display = tab === 'scores' ? 'block' : 'none';
-        document.getElementById('tab-course-config').style.display = tab === 'course-config' ? 'block' : 'none';
-        document.getElementById('tab-students-master').style.display = tab === 'students-master' ? 'block' : 'none';
-
-        if (tab === 'scores') {
-            document.querySelectorAll('.tab-btn')[3].classList.add('active');
-            renderScoreDropdowns();
-        } else if (tab === 'course-config') {
-            document.querySelectorAll('.tab-btn')[4].classList.add('active');
-            renderGeneralSettingsLists();
+            ind.style.background = 'rgba(239,68,68,0.25)'; ind.style.color = '#f87171';
         }
     };
 
-    // 🚀 初始化雲端資料
+    // --- 登入與登出 ---
+    function renderLoginTeachers() {
+        const sel = document.getElementById('loginTeacherSelect');
+        if (!sel) return;
+        const list = window.state.generalSettings.teachers || DEFAULT_GENERAL.teachers;
+        sel.innerHTML = list.map(t => `<option value="${t}">${t}</option>`).join('');
+    }
+
+    window.handleLogin = function() {
+        const teacher = document.getElementById('loginTeacherSelect').value;
+        const pin = document.getElementById('loginPinInput').value.trim();
+        if (!teacher) return showToast('請選擇登入老師', 'error');
+        if (pin !== '1234' && pin !== '8888' && pin !== '0000') {
+            return showToast('❌ PIN 碼錯誤！（預設為 1234 或 8888）', 'error');
+        }
+        window.state.currentTeacher = teacher;
+        localStorage.setItem('gude_score_teacher', teacher);
+        document.getElementById('currentTeacherDisplay').innerText = teacher;
+        document.getElementById('loginOverlay').style.display = 'none';
+        showToast(`👋 歡迎登入，${teacher}！`);
+    };
+
+    window.handleLogout = function() {
+        localStorage.removeItem('gude_score_teacher');
+        window.state.currentTeacher = '';
+        document.getElementById('loginPinInput').value = '';
+        document.getElementById('loginOverlay').style.display = 'flex';
+    };
+
+    // --- 分頁切換 ---
+    window.switchTab = function(tab) {
+        document.getElementById('tabBtn_scores').classList.toggle('active', tab === 'scores');
+        document.getElementById('tabBtn_settings').classList.toggle('active', tab === 'settings');
+        document.getElementById('tab-scores').style.display = tab === 'scores' ? 'block' : 'none';
+        document.getElementById('tab-settings').style.display = tab === 'settings' ? 'block' : 'none';
+
+        if (tab === 'scores') {
+            renderScoreDropdowns();
+            renderScoreTable();
+        } else {
+            renderAllSettingsUI();
+        }
+    };
+
+    // --- 初始化讀取 Firebase 雲端資料 ---
     async function initCloudData() {
-        updateSyncIndicator('syncing', '🔄 正在載入雲端資料...');
+        updateSyncIndicator('syncing', '🔄 載入雲端資料中...');
         try {
             const [coursesDoc, studentsSnapshot, scoresDoc, generalDoc] = await Promise.all([
                 getDoc(doc(db, "classLogSettings", "courses")),
@@ -332,289 +507,626 @@
                 getDoc(doc(db, "classLogSettings", "general"))
             ]);
 
-            if (coursesDoc.exists()) window.state.courses = coursesDoc.data().data || {};
-            if (scoresDoc.exists()) window.state.scores = scoresDoc.data().data || {};
-            if (generalDoc.exists()) {
-                const gData = generalDoc.data().data || {};
-                if(gData.years) window.state.generalSettings.years = gData.years;
-                if(gData.exams) window.state.generalSettings.exams = gData.exams;
+            if (coursesDoc.exists()) {
+                const cData = coursesDoc.data().data || {};
+                window.state.courses = {
+                    care: cData.care || [],
+                    elementary: cData.elementary || [],
+                    junior: cData.junior || []
+                };
             }
-            
+
+            if (scoresDoc.exists()) {
+                window.state.scores = scoresDoc.data().data || {};
+            }
+
+            if (generalDoc.exists()) {
+                const g = generalDoc.data().data || {};
+                window.state.generalSettings = {
+                    years: (Array.isArray(g.years) && g.years.length) ? g.years : DEFAULT_GENERAL.years,
+                    exams: (Array.isArray(g.exams) && g.exams.length) ? g.exams : DEFAULT_GENERAL.exams,
+                    teachers: (Array.isArray(g.teachers) && g.teachers.length) ? g.teachers : DEFAULT_GENERAL.teachers,
+                    juniorSubjects: (Array.isArray(g.juniorSubjects) && g.juniorSubjects.length) ? g.juniorSubjects : DEFAULT_GENERAL.juniorSubjects,
+                    elemSubjects: (Array.isArray(g.elemSubjects) && g.elemSubjects.length) ? g.elemSubjects : DEFAULT_GENERAL.elemSubjects
+                };
+            }
+
             window.state.students = [];
             studentsSnapshot.forEach(d => {
                 const s = d.data();
-                const coursesArr = (Array.isArray(s.courses) && s.courses.length > 0) ? s.courses : (s.course ? s.course.split(/[,，、]/) : []);
+                const coursesArr = (Array.isArray(s.courses) && s.courses.length > 0)
+                    ? s.courses
+                    : (s.course ? s.course.split(/[,，、]/).map(x => x.trim()).filter(Boolean) : []);
                 window.state.students.push({ firestoreId: d.id, ...s, courses: coursesArr });
             });
 
-            updateSyncIndicator('success', '☁️ 雲端同步完成');
+            renderLoginTeachers();
             renderScoreDropdowns();
-            renderGeneralSettingsLists();
-        } catch (e) {
-            console.error("載入失敗：", e);
-            updateSyncIndicator('error', '⚠️ 網路連線失敗');
-            showToast('載入雲端資料失敗', 'error');
+            renderAllSettingsUI();
+
+            // 自動選擇第一個有學生的班級方便預覽
+            const courseSel = document.getElementById('scoreCourse');
+            if (courseSel && !courseSel.value && courseSel.options.length > 1) {
+                courseSel.selectedIndex = 1;
+                renderScoreTable();
+            }
+
+            updateSyncIndicator('success', '☁️ 雲端同步完成');
+        } catch (err) {
+            console.error("讀取雲端失敗：", err);
+            updateSyncIndicator('error', '⚠️ 雲端離線或連線異常');
+            showToast('雲端資料載入異常，請檢查網路狀態', 'error');
         }
     }
 
     // ==========================================
-    // 🏆 成績登記系統核心邏輯
+    // 💯 成績登記與動態科目表格渲染
     // ==========================================
     window.renderScoreDropdowns = function() {
         const yearSel = document.getElementById('scoreYear');
         const examSel = document.getElementById('scoreExam');
         const courseSel = document.getElementById('scoreCourse');
-        if(!yearSel || !examSel || !courseSel) return;
+        const quickCourseSel = document.getElementById('quickStuCourse');
+        if (!yearSel || !examSel || !courseSel) return;
 
-        const curYear = yearSel.value;
+        const prevYear = yearSel.value;
+        const prevExam = examSel.value;
+        const prevCourse = courseSel.value;
+
         yearSel.innerHTML = window.state.generalSettings.years.map(y => `<option value="${y}">${y}</option>`).join('');
-        if(curYear && window.state.generalSettings.years.includes(curYear)) yearSel.value = curYear;
+        if (prevYear && window.state.generalSettings.years.includes(prevYear)) yearSel.value = prevYear;
 
-        const curExam = examSel.value;
         examSel.innerHTML = window.state.generalSettings.exams.map(e => `<option value="${e}">${e}</option>`).join('');
-        if(curExam && window.state.generalSettings.exams.includes(curExam)) examSel.value = curExam;
+        if (prevExam && window.state.generalSettings.exams.includes(prevExam)) examSel.value = prevExam;
 
-        const curCourse = courseSel.value;
-        courseSel.innerHTML = '<option value="">-- 請選擇登記班級 --</option>';
+        courseSel.innerHTML = '<option value="">-- 請選擇班級 --</option>';
+        if (quickCourseSel) quickCourseSel.innerHTML = '<option value="">-- 選擇要加入的班級 --</option>';
+
+        const deptLabels = { junior: '📙 國中部', elementary: '📘 國小部', care: '🏢 課輔部 (安親班)' };
         ['junior', 'elementary', 'care'].forEach(dept => {
             const list = window.state.courses[dept] || [];
-            if(list.length > 0) {
+            if (list.length > 0) {
                 const group = document.createElement('optgroup');
-                group.label = dept === 'junior' ? '📙 國中部' : (dept === 'elementary' ? '📘 國小部' : '🏢 課輔部');
+                group.label = deptLabels[dept];
                 list.forEach(c => {
                     const cName = typeof c === 'object' ? c.name : c;
+                    const stuCount = window.state.students.filter(s => s.courses.includes(cName) && s.status !== 'graduated').length;
                     const opt = document.createElement('option');
                     opt.value = `${dept}|${cName}`;
-                    opt.innerText = cName;
+                    opt.innerText = `${cName} (${stuCount}人)`;
                     group.appendChild(opt);
+
+                    if (quickCourseSel) {
+                        const qOpt = document.createElement('option');
+                        qOpt.value = cName;
+                        qOpt.innerText = `[${deptLabels[dept].slice(2)}] ${cName}`;
+                        quickCourseSel.appendChild(qOpt);
+                    }
                 });
                 courseSel.appendChild(group);
             }
         });
-        if(curCourse) courseSel.value = curCourse;
+
+        if (prevCourse) courseSel.value = prevCourse;
     };
 
     window.renderScoreTable = function() {
         const courseVal = document.getElementById('scoreCourse').value;
         const container = document.getElementById('scoreTableContainer');
         const titleEl = document.getElementById('scoreTableTitle');
-        
-        if(!courseVal) {
-            container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:30px;">等待選擇班級以載入學生名單...</p>';
+
+        if (!courseVal) {
             titleEl.innerText = '請先選擇上方班級';
+            container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:40px 20px;">請從上方下拉選單選擇要登錄成績的班級...</p>';
             return;
         }
 
         const [dept, courseName] = courseVal.split('|');
         const year = document.getElementById('scoreYear').value;
         const exam = document.getElementById('scoreExam').value;
-        
-        titleEl.innerText = `📋 ${courseName} - ${exam} 登記區`;
+        const isJunior = (dept === 'junior');
+        const subjects = isJunior
+            ? (window.state.generalSettings.juniorSubjects || DEFAULT_GENERAL.juniorSubjects)
+            : (window.state.generalSettings.elemSubjects || DEFAULT_GENERAL.elemSubjects);
 
-        const classStudents = window.state.students.filter(s => s.courses.includes(courseName) && s.status !== 'graduated');
-        
-        if(classStudents.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#b91c1c; padding:30px;">此班級目前沒有在籍學生。</p>';
+        titleEl.innerText = `📋 【${year}】${courseName} — ${exam}`;
+
+        const classStudents = window.state.students
+            .filter(s => s.courses.includes(courseName) && s.status !== 'graduated')
+            .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'zh-Hant'));
+
+        if (classStudents.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:35px 20px; color:#64748b;">
+                    <p style="font-size:16px; font-weight:bold; color:#b91c1c; margin-bottom:8px;">此班級（${courseName}）目前尚無在籍學生</p>
+                    <p style="font-size:13px; margin-bottom:14px;">您可以點擊上方「⚙️ 系統設定」分頁底部的「快速新增學生至班級」，或至點名系統為學生加選此班級。</p>
+                    <button class="btn btn-primary" onclick="switchTab('settings')">前往系統設定新增學生</button>
+                </div>`;
             return;
         }
 
-        const isJunior = (dept === 'junior');
-        
         let html = `<table>
             <thead>
                 <tr>
-                    <th style="width:40px;">座號</th>
-                    <th style="width:110px;">學生姓名</th>
-                    <th style="width:100px;">學校</th>
-                    <th>${isJunior ? '國文' : '國語'}</th>
-                    <th>英文</th>
-                    <th>數學</th>
-                    <th>自然</th>
-                    <th>社會</th>
-                    <th style="background:#fee2e2;">總分</th>
-                    <th style="background:#fef3c7;">平均</th>
-                    ${isJunior ? `<th>班排</th><th>校排</th>` : `<th>獎狀?</th><th>獎項類別</th>`}
-                </tr>
-            </thead>
-            <tbody>`;
+                    <th style="width:45px;">序</th>
+                    <th style="width:130px;">學生姓名</th>
+                    <th style="width:120px;">就讀學校</th>`;
+
+        subjects.forEach(sub => {
+            html += `<th>${sub}</th>`;
+        });
+
+        html += `
+                    <th style="background:#dbeafe; color:#1e3a8a;">總分</th>
+                    <th style="background:#fee2e2; color:#991b1b;">平均</th>`;
+
+        if (isJunior) {
+            html += `
+                    <th style="background:#fef3c7; color:#92400e;">班級名次</th>
+                    <th style="background:#fef3c7; color:#92400e;">全校名次</th>`;
+        } else {
+            html += `
+                    <th style="background:#fef3c7; color:#92400e;">班級名次</th>
+                    <th style="background:#dcfce7; color:#166534;">有拿獎狀?</th>
+                    <th style="background:#dcfce7; color:#166534;">獎狀類別 / 備註</th>`;
+        }
+
+        html += `</tr></thead><tbody>`;
 
         classStudents.forEach((stu, idx) => {
             const key = `${year}_${exam}_${courseName}_${stu.name}`;
             const rec = window.state.scores[key] || {};
-            
-            html += `<tr>
-                <td style="font-weight:bold;">${idx + 1}</td>
-                <td><b id="stuName_${idx}" style="color:var(--primary); transition: 0.3s;">${stu.name}</b></td>
-                <td style="font-size:12px; color:#64748b;">${stu.school || '-'}</td>
-                <td><input type="number" class="score-input" value="${rec.ch||''}" onchange="saveScore('${key}','ch',this.value)" id="ch_${idx}"></td>
-                <td><input type="number" class="score-input" value="${rec.en||''}" onchange="saveScore('${key}','en',this.value)" id="en_${idx}"></td>
-                <td><input type="number" class="score-input" value="${rec.ma||''}" onchange="saveScore('${key}','ma',this.value)" id="ma_${idx}"></td>
-                <td><input type="number" class="score-input" value="${rec.sc||''}" onchange="saveScore('${key}','sc',this.value)" id="sc_${idx}"></td>
-                <td><input type="number" class="score-input" value="${rec.so||''}" onchange="saveScore('${key}','so',this.value)" id="so_${idx}"></td>
-                <td class="avg-cell" id="total_${idx}">${rec.total || 0}</td>
-                <td class="avg-cell" id="avg_${idx}">${rec.avg || 0}</td>
-            `;
+            // 相容舊版欄位 (ch, en, ma, sc, so) 與新版動態科目
+            const subScores = rec.subScores || {};
 
-            if(isJunior) {
+            html += `<tr>
+                <td style="font-weight:bold; color:#64748b;">${idx + 1}</td>
+                <td><span id="stuName_${idx}" style="font-weight:800; color:var(--primary); transition:0.25s;">${stu.name}</span></td>
+                <td style="font-size:13px; color:#475569; font-weight:600;">${stu.school || '-'}</td>`;
+
+            subjects.forEach((sub, sIdx) => {
+                let val = subScores[sub];
+                // 相容舊版固定欄位代號
+                if (val === undefined) {
+                    if (sub === '國文' || sub === '國語') val = rec.ch;
+                    else if (sub === '英文') val = rec.en;
+                    else if (sub === '數學') val = rec.ma;
+                    else if (sub === '自然') val = rec.sc;
+                    else if (sub === '社會') val = rec.so;
+                }
+                const displayVal = (val !== undefined && val !== null) ? val : '';
+                html += `<td>
+                    <input type="number" step="0.5" min="0" max="100" class="score-input ${Number(displayVal)===100?'full-mark':''}"
+                        id="sub_${idx}_${sIdx}" data-sub="${sub}" value="${displayVal}"
+                        placeholder="-"
+                        oninput="onScoreInput('${key}', ${idx}, '${sub}', this.value, this)">
+                </td>`;
+            });
+
+            html += `
+                <td class="total-cell" id="total_${idx}">0</td>
+                <td class="avg-cell" id="avg_${idx}">0</td>`;
+
+            if (isJunior) {
                 html += `
-                    <td><input type="text" class="rank-input" value="${rec.classRank||''}" placeholder="1/30" onchange="saveScore('${key}','classRank',this.value)"></td>
-                    <td><input type="text" class="rank-input" value="${rec.schoolRank||''}" placeholder="15/300" onchange="saveScore('${key}','schoolRank',this.value)"></td>
-                `;
+                    <td><input type="text" class="rank-input" value="${rec.classRank || ''}" placeholder="例: 3" oninput="saveField('${key}', 'classRank', this.value)"></td>
+                    <td><input type="text" class="rank-input" value="${rec.schoolRank || ''}" placeholder="例: 18" oninput="saveField('${key}', 'schoolRank', this.value)"></td>`;
             } else {
                 html += `
+                    <td><input type="text" class="rank-input" value="${rec.classRank || ''}" placeholder="例: 2" oninput="saveField('${key}', 'classRank', this.value)"></td>
                     <td>
                         <label class="switch">
-                            <input type="checkbox" ${rec.hasAward ? 'checked' : ''} onchange="saveScore('${key}','hasAward',this.checked)">
+                            <input type="checkbox" ${rec.hasAward ? 'checked' : ''} onchange="saveField('${key}', 'hasAward', this.checked)">
                             <span class="slider"></span>
                         </label>
                     </td>
                     <td>
-                        <select onchange="saveScore('${key}','awardType',this.value)" style="padding:5px; border:1px solid #ccc; border-radius:4px; font-size:13px;">
-                            <option value="">-- 無 --</option>
-                            <option value="第一名" ${rec.awardType==='第一名'?'selected':''}>第一名</option>
-                            <option value="第二名" ${rec.awardType==='第二名'?'selected':''}>第二名</option>
-                            <option value="第三名" ${rec.awardType==='第三名'?'selected':''}>第三名</option>
-                            <option value="優等" ${rec.awardType==='優等'?'selected':''}>優等獎</option>
-                            <option value="進步獎" ${rec.awardType==='進步獎'?'selected':''}>最佳進步獎</option>
-                            <option value="滿分" ${rec.awardType==='滿分'?'selected':''}>單科滿分獎</option>
+                        <select onchange="saveField('${key}', 'awardType', this.value)" style="padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px; font-weight:bold; min-width:115px;">
+                            <option value="">-- 請選擇 --</option>
+                            <option value="第一名獎狀" ${rec.awardType==='第一名獎狀'||rec.awardType==='第一名'?'selected':''}>🥇 第一名獎狀</option>
+                            <option value="第二名獎狀" ${rec.awardType==='第二名獎狀'||rec.awardType==='第二名'?'selected':''}>🥈 第二名獎狀</option>
+                            <option value="第三名獎狀" ${rec.awardType==='第三名獎狀'||rec.awardType==='第三名'?'selected':''}>🥉 第三名獎狀</option>
+                            <option value="優等獎狀" ${rec.awardType==='優等獎狀'||rec.awardType==='優等'?'selected':''}>🏅 優等獎狀</option>
+                            <option value="最佳進步獎" ${rec.awardType==='最佳進步獎'||rec.awardType==='進步獎'?'selected':''}>📈 最佳進步獎</option>
+                            <option value="單科滿分獎" ${rec.awardType==='單科滿分獎'||rec.awardType==='滿分'?'selected':''}>💯 單科滿分獎</option>
                         </select>
-                    </td>
-                `;
+                    </td>`;
             }
+
             html += `</tr>`;
         });
 
         html += `</tbody></table>`;
         container.innerHTML = html;
-        
-        // 渲染完即時計算一次，並判斷是否觸發金色特效
-        classStudents.forEach((_, idx) => calcScoreTotal(idx));
+
+        // 初次渲染完畢後，對每位學生計算一次總分、平均與金色姓名判斷
+        classStudents.forEach((_, idx) => recalcRow(idx, subjects.length));
     };
 
-    function calcScoreTotal(idx) {
-        const subjects = ['ch', 'en', 'ma', 'sc', 'so'];
-        let total = 0; let count = 0; let hasPerfectScore = false;
-        
-        subjects.forEach(sub => {
-            const el = document.getElementById(`${sub}_${idx}`);
-            if(el && el.value !== '') {
-                let score = parseFloat(el.value);
-                total += score;
-                count++;
-                if(score === 100) hasPerfectScore = true;
+    // --- 單列即時計算總分、平均與金色榮譽榜 ---
+    function recalcRow(rowIdx, subCount) {
+        let total = 0;
+        let count = 0;
+        let hasPerfectScore = false;
+
+        for (let sIdx = 0; sIdx < subCount; sIdx++) {
+            const inputEl = document.getElementById(`sub_${rowIdx}_${sIdx}`);
+            if (inputEl && inputEl.value !== '') {
+                const val = parseFloat(inputEl.value);
+                if (!isNaN(val)) {
+                    total += val;
+                    count++;
+                    if (val === 100) hasPerfectScore = true;
+                }
             }
-        });
-        
-        const tEl = document.getElementById(`total_${idx}`);
-        const aEl = document.getElementById(`avg_${idx}`);
-        const nameEl = document.getElementById(`stuName_${idx}`);
-        
-        let avg = 0;
-        if (count > 0) {
-            avg = parseFloat((total / count).toFixed(1));
         }
 
-        if(tEl) tEl.innerText = count > 0 ? total : 0;
-        if(aEl) aEl.innerText = count > 0 ? avg : 0;
-        
-        // 🌟 自動金色紅榜判斷邏輯
+        const avg = count > 0 ? parseFloat((total / count).toFixed(1)) : 0;
+        const totalEl = document.getElementById(`total_${rowIdx}`);
+        const avgEl = document.getElementById(`avg_${rowIdx}`);
+        const nameEl = document.getElementById(`stuName_${rowIdx}`);
+
+        if (totalEl) totalEl.innerText = count > 0 ? Number(total.toFixed(1)) : 0;
+        if (avgEl) avgEl.innerText = count > 0 ? avg : 0;
+
+        // 🌟 自動判斷：平均 >= 90 或 任一科 100 分，名字變金色
         if (nameEl) {
-            if (avg >= 90 || hasPerfectScore) {
+            if (count > 0 && (avg >= 90 || hasPerfectScore)) {
                 nameEl.classList.add('name-gold');
-                nameEl.style.color = ''; // 讓 CSS class 優先
             } else {
                 nameEl.classList.remove('name-gold');
-                nameEl.style.color = 'var(--primary)'; // 恢復原本的深藍色
             }
         }
 
-        return { total, avg };
+        return { total: Number(total.toFixed(1)), avg };
     }
 
-    window.saveScore = function(key, field, value) {
-        if(!window.state.scores[key]) window.state.scores[key] = {};
-        window.state.scores[key][field] = value;
+    window.onScoreInput = function(key, rowIdx, subName, valStr, inputEl) {
+        if (!window.state.scores[key]) window.state.scores[key] = {};
+        if (!window.state.scores[key].subScores) window.state.scores[key].subScores = {};
 
-        if(['ch','en','ma','sc','so'].includes(field)) {
-            const idx = parseInt(event.target.id.split('_')[1]);
-            const res = calcScoreTotal(idx);
-            window.state.scores[key].total = res.total;
-            window.state.scores[key].avg = res.avg;
+        window.state.scores[key].subScores[subName] = valStr;
+        if (inputEl) {
+            inputEl.classList.toggle('full-mark', Number(valStr) === 100);
         }
 
-        updateSyncIndicator('syncing', '🔄 準備寫入雲端...');
+        const courseVal = document.getElementById('scoreCourse').value;
+        const isJunior = courseVal.startsWith('junior|');
+        const subjects = isJunior ? window.state.generalSettings.juniorSubjects : window.state.generalSettings.elemSubjects;
+
+        const res = recalcRow(rowIdx, subjects.length);
+        window.state.scores[key].total = res.total;
+        window.state.scores[key].avg = res.avg;
+        window.state.scores[key].updatedBy = window.state.currentTeacher || '老師';
+
+        scheduleScoreSync();
+    };
+
+    window.saveField = function(key, field, value) {
+        if (!window.state.scores[key]) window.state.scores[key] = {};
+        window.state.scores[key][field] = value;
+        window.state.scores[key].updatedBy = window.state.currentTeacher || '老師';
+        scheduleScoreSync();
+    };
+
+    function scheduleScoreSync() {
+        updateSyncIndicator('syncing', '🔄 準備同步至雲端...');
         clearTimeout(scoreSyncTimer);
         scoreSyncTimer = setTimeout(() => {
             performScoreSync();
-        }, 1500); 
+        }, 1200);
+    }
+
+    window.forceSaveScores = async function() {
+        clearTimeout(scoreSyncTimer);
+        await performScoreSync();
+        showToast('💾 成績已強制同步至雲端！');
     };
 
     async function performScoreSync() {
-        updateSyncIndicator('syncing', '🔄 成績上傳中...');
+        updateSyncIndicator('syncing', '🔄 雲端寫入中...');
         try {
             await setDoc(doc(db, "classLogSettings", "scores"), { data: window.state.scores }, { merge: true });
-            updateSyncIndicator('success', '☁️ 雲端同步完成');
-        } catch (error) {
-            console.error("成績同步失敗:", error);
+            updateSyncIndicator('success', '☁️ 雲端已同步');
+        } catch (err) {
+            console.error("成績同步失敗：", err);
             updateSyncIndicator('error', '⚠️ 雲端同步失敗');
+            showToast('雲端同步失敗，請檢查網路', 'error');
         }
     }
 
-    // ==========================================
-    // ⚙️ 自訂學年度與考試類別管理邏輯
-    // ==========================================
-    window.renderGeneralSettingsLists = function() {
-        const yearDiv = document.getElementById('yearListDiv');
-        const examDiv = document.getElementById('examListDiv');
-        if(!yearDiv || !examDiv) return;
+    // --- 匯出目前班級成績單 CSV ---
+    window.exportScoreCSV = function() {
+        const courseVal = document.getElementById('scoreCourse').value;
+        if (!courseVal) return showToast('請先選擇要匯出的班級', 'warning');
 
-        yearDiv.innerHTML = window.state.generalSettings.years.map((y, i) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:6px 10px; border:1px solid #e2e8f0; border-radius:4px;">
-                <span>${y}</span>
-                <button class="btn btn-outline" style="padding:2px 8px; font-size:12px; color:#e74c3c; border-color:#e74c3c;" onclick="deleteGeneralSetting('years', ${i})">刪除</button>
-            </div>
-        `).join('');
+        const [dept, courseName] = courseVal.split('|');
+        const year = document.getElementById('scoreYear').value;
+        const exam = document.getElementById('scoreExam').value;
+        const isJunior = (dept === 'junior');
+        const subjects = isJunior ? window.state.generalSettings.juniorSubjects : window.state.generalSettings.elemSubjects;
 
-        examDiv.innerHTML = window.state.generalSettings.exams.map((e, i) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:6px 10px; border:1px solid #e2e8f0; border-radius:4px;">
-                <span>${e}</span>
-                <button class="btn btn-outline" style="padding:2px 8px; font-size:12px; color:#e74c3c; border-color:#e74c3c;" onclick="deleteGeneralSetting('exams', ${i})">刪除</button>
-            </div>
-        `).join('');
+        const classStudents = window.state.students
+            .filter(s => s.courses.includes(courseName) && s.status !== 'graduated')
+            .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'zh-Hant'));
+
+        if (classStudents.length === 0) return showToast('此班級無學生可匯出', 'warning');
+
+        const headers = ['座號', '學生姓名', '就讀學校', ...subjects, '總分', '平均'];
+        if (isJunior) headers.push('班級名次', '全校名次');
+        else headers.push('班級名次', '是否拿獎狀', '獎狀類別');
+
+        const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+        const rows = [headers.map(escapeCSV).join(',')];
+
+        classStudents.forEach((stu, idx) => {
+            const key = `${year}_${exam}_${courseName}_${stu.name}`;
+            const rec = window.state.scores[key] || {};
+            const subScores = rec.subScores || {};
+            const row = [idx + 1, stu.name, stu.school || '-'];
+
+            subjects.forEach(sub => {
+                row.push(subScores[sub] ?? '');
+            });
+
+            row.push(rec.total ?? 0, rec.avg ?? 0);
+            if (isJunior) {
+                row.push(rec.classRank || '', rec.schoolRank || '');
+            } else {
+                row.push(rec.classRank || '', rec.hasAward ? '是' : '否', rec.awardType || '');
+            }
+            rows.push(row.map(escapeCSV).join(','));
+        });
+
+        const blob = new Blob(["\uFEFF" + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `顧德補習班_${year}_${courseName}_${exam}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('📥 成績單 CSV 已下載！');
     };
 
-    window.addGeneralSetting = async function(type, inputId) {
-        const val = document.getElementById(inputId).value.trim();
-        if(!val) return showToast('請輸入名稱', 'error');
-        if(!window.state.generalSettings[type]) window.state.generalSettings[type] = [];
-        
+    // ==========================================
+    // ⚙️ 系統設定專區：科目、學年度、考試、老師、班級
+    // ==========================================
+    window.renderAllSettingsUI = function() {
+        // 1. 國中部科目
+        const jSubDiv = document.getElementById('juniorSubList');
+        if (jSubDiv) {
+            jSubDiv.innerHTML = (window.state.generalSettings.juniorSubjects || []).map((s, i) => `
+                <div class="tag-item">
+                    <span>${s}</span>
+                    <button title="刪除此科目" onclick="removeGeneralItem('juniorSubjects', ${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // 2. 國小部科目
+        const eSubDiv = document.getElementById('elemSubList');
+        if (eSubDiv) {
+            eSubDiv.innerHTML = (window.state.generalSettings.elemSubjects || []).map((s, i) => `
+                <div class="tag-item">
+                    <span>${s}</span>
+                    <button title="刪除此科目" onclick="removeGeneralItem('elemSubjects', ${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // 3. 學年度/年次
+        const yDiv = document.getElementById('yearListDiv');
+        if (yDiv) {
+            yDiv.innerHTML = (window.state.generalSettings.years || []).map((y, i) => `
+                <div class="tag-item">
+                    <span>${y}</span>
+                    <button title="刪除" onclick="removeGeneralItem('years', ${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // 4. 考試類別
+        const exDiv = document.getElementById('examListDiv');
+        if (exDiv) {
+            exDiv.innerHTML = (window.state.generalSettings.exams || []).map((ex, i) => `
+                <div class="tag-item">
+                    <span>${ex}</span>
+                    <button title="刪除" onclick="removeGeneralItem('exams', ${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // 5. 老師名單
+        const tDiv = document.getElementById('teacherListDiv');
+        if (tDiv) {
+            tDiv.innerHTML = (window.state.generalSettings.teachers || []).map((t, i) => `
+                <div class="tag-item">
+                    <span>${t}</span>
+                    <button title="刪除" onclick="removeGeneralItem('teachers', ${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // 6. 班級清單 (國中部 / 國小部 / 課輔安親班)
+        ['junior', 'elementary', 'care'].forEach(dept => {
+            const list = window.state.courses[dept] || [];
+            const countEl = document.getElementById(`count_${dept}`);
+            const boxEl = document.getElementById(`classList_${dept}`);
+            if (countEl) countEl.innerText = `共 ${list.length} 班`;
+            if (!boxEl) return;
+
+            if (list.length === 0) {
+                boxEl.innerHTML = `<div style="color:#94a3b8; font-size:13px; text-align:center; padding:12px;">尚無班級</div>`;
+            } else {
+                boxEl.innerHTML = list.map((c, idx) => {
+                    const cName = typeof c === 'object' ? c.name : c;
+                    const cTeacher = typeof c === 'object' ? (c.teacher || '未指定老師') : '';
+                    const cTime = typeof c === 'object' ? (c.time || '') : '';
+                    const stuCount = window.state.students.filter(s => s.courses.includes(cName) && s.status !== 'graduated').length;
+                    return `
+                        <div style="background:white; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <div>
+                                <div style="font-weight:bold; color:var(--primary); font-size:14px;">🏫 ${cName} <span style="font-size:12px; color:#2563eb;">(${stuCount}人)</span></div>
+                                <div style="font-size:12px; color:#64748b; margin-top:2px;">👨‍🏫 ${cTeacher} ${cTime ? `｜ 🕒 ${cTime}` : ''}</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCourseClass('${dept}', ${idx}, '${cName.replace(/'/g, "\\'")}')">刪除</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        });
+
+        renderScoreDropdowns();
+        renderLoginTeachers();
+    };
+
+    // 新增科目
+    window.addSubject = async function(type, inputId) {
+        const input = document.getElementById(inputId);
+        const val = input.value.trim();
+        if (!val) return showToast('請輸入科目名稱', 'warning');
+        if (!window.state.generalSettings[type]) window.state.generalSettings[type] = [];
+        if (window.state.generalSettings[type].includes(val)) return showToast('此科目已存在', 'warning');
+
         window.state.generalSettings[type].push(val);
-        document.getElementById(inputId).value = '';
-        await saveGeneralSettingsToCloud();
+        input.value = '';
+        await saveGeneralToCloud();
     };
 
-    window.deleteGeneralSetting = async function(type, idx) {
-        if(!confirm('確定要刪除此設定嗎？(不會影響已登記的歷史成績)')) return;
+    // 新增學年度 / 考試 / 老師
+    window.addGeneralItem = async function(type, inputId) {
+        const input = document.getElementById(inputId);
+        const val = input.value.trim();
+        if (!val) return showToast('請輸入內容', 'warning');
+        if (!window.state.generalSettings[type]) window.state.generalSettings[type] = [];
+        if (window.state.generalSettings[type].includes(val)) return showToast('項目已存在', 'warning');
+
+        window.state.generalSettings[type].push(val);
+        input.value = '';
+        await saveGeneralToCloud();
+    };
+
+    // 刪除科目 / 學年度 / 考試 / 老師
+    window.removeGeneralItem = async function(type, idx) {
+        const item = window.state.generalSettings[type][idx];
+        if (!confirm(`確定要刪除「${item}」嗎？`)) return;
         window.state.generalSettings[type].splice(idx, 1);
-        await saveGeneralSettingsToCloud();
+        await saveGeneralToCloud();
     };
 
-    async function saveGeneralSettingsToCloud() {
+    async function saveGeneralToCloud() {
         updateSyncIndicator('syncing', '🔄 儲存設定中...');
         try {
             await setDoc(doc(db, "classLogSettings", "general"), { data: window.state.generalSettings }, { merge: true });
             updateSyncIndicator('success', '☁️ 設定已同步');
-            renderGeneralSettingsLists();
-            renderScoreDropdowns();
-            showToast('✅ 設定已更新', 'success');
-        } catch(e) {
-            updateSyncIndicator('error', '⚠️ 儲存失敗');
-            showToast('設定儲存失敗', 'error');
+            renderAllSettingsUI();
+            showToast('✅ 系統設定已更新並同步雲端！');
+        } catch (err) {
+            console.error(err);
+            updateSyncIndicator('error', '⚠️ 設定儲存失敗');
+            showToast('儲存失敗，請檢查網路', 'error');
         }
     }
 
-    // 啟動程式
+    // 新增補習班班級 (直接同步至 classLogSettings/courses)
+    window.addNewCourseClass = async function() {
+        const dept = document.getElementById('newClassDept').value;
+        const name = document.getElementById('newClassName').value.trim();
+        const teacher = document.getElementById('newClassTeacher').value.trim() || '任課老師';
+        const time = document.getElementById('newClassTime').value.trim() || '未設定';
+
+        if (!name) return showToast('請輸入班級名稱！', 'warning');
+        if (!window.state.courses[dept]) window.state.courses[dept] = [];
+
+        const exists = window.state.courses[dept].some(c => (typeof c === 'object' ? c.name : c) === name);
+        if (exists) return showToast('該部門已有相同名稱的班級！', 'warning');
+
+        const todayMonthStart = new Date().toISOString().slice(0, 8) + '01';
+        window.state.courses[dept].push({
+            name: name,
+            teacher: teacher,
+            time: time,
+            day: '星期一、星期二、星期三、星期四、星期五',
+            startDate: todayMonthStart,
+            endDate: ''
+        });
+
+        updateSyncIndicator('syncing', '🔄 新增班級中...');
+        try {
+            await setDoc(doc(db, "classLogSettings", "courses"), { data: window.state.courses });
+            document.getElementById('newClassName').value = '';
+            document.getElementById('newClassTeacher').value = '';
+            document.getElementById('newClassTime').value = '';
+            updateSyncIndicator('success', '☁️ 班級已同步');
+            renderAllSettingsUI();
+            showToast(`✅ 已成功新增班級【${name}】！`);
+        } catch (err) {
+            console.error(err);
+            showToast('新增班級失敗', 'error');
+        }
+    };
+
+    // 刪除補習班班級
+    window.deleteCourseClass = async function(dept, idx, cName) {
+        if (!confirm(`⚠️ 確定要刪除班級【${cName}】嗎？`)) return;
+        window.state.courses[dept].splice(idx, 1);
+        updateSyncIndicator('syncing', '🔄 刪除班級中...');
+        try {
+            await setDoc(doc(db, "classLogSettings", "courses"), { data: window.state.courses });
+            updateSyncIndicator('success', '☁️ 班級已同步');
+            renderAllSettingsUI();
+            showToast(`🗑️ 已刪除班級【${cName}】`);
+        } catch (err) {
+            console.error(err);
+            showToast('刪除失敗', 'error');
+        }
+    };
+
+    // 快速新增學生至班級
+    window.quickAddStudent = async function() {
+        const name = document.getElementById('quickStuName').value.trim();
+        const school = document.getElementById('quickStuSchool').value.trim();
+        const courseName = document.getElementById('quickStuCourse').value;
+
+        if (!name) return showToast('請輸入學生姓名', 'warning');
+        if (!courseName) return showToast('請選擇要加入的班級', 'warning');
+
+        updateSyncIndicator('syncing', '🔄 新增學生中...');
+        try {
+            const newDocRef = doc(collection(db, "classLogStudents"));
+            const stuObj = {
+                name: name,
+                gender: '男',
+                school: school || '',
+                studentClass: '',
+                courses: [courseName],
+                course: courseName,
+                status: 'active',
+                phones: [{ label: '媽媽', number: '' }, { label: '爸爸', number: '' }, { label: '學生本人', number: '' }],
+                attendanceLogs: []
+            };
+            await setDoc(newDocRef, stuObj);
+            window.state.students.push({ firestoreId: newDocRef.id, ...stuObj });
+
+            document.getElementById('quickStuName').value = '';
+            document.getElementById('quickStuSchool').value = '';
+            updateSyncIndicator('success', '☁️ 學生已同步');
+            renderAllSettingsUI();
+            showToast(`✅ 學生【${name}】已加入【${courseName}】！`);
+        } catch (err) {
+            console.error(err);
+            showToast('新增學生失敗', 'error');
+        }
+    };
+
+    // 啟動系統
     window.onload = function() {
+        if (window.state.currentTeacher) {
+            document.getElementById('currentTeacherDisplay').innerText = window.state.currentTeacher;
+            document.getElementById('loginOverlay').style.display = 'none';
+        }
         initCloudData();
     };
 </script>
