@@ -45,7 +45,7 @@
                 box-shadow: 0 -4px 15px rgba(0,0,0,0.08); z-index: 999;
                 display: flex; justify-content: space-around; align-items: flex-start;
                 padding: 6px 2px env(safe-area-inset-bottom, 6px); margin: 0; gap: 2px;
-                overflow-x: auto; /* 讓多出來的按鈕可以滑動 */
+                overflow-x: auto;
             }
             .tab-btn {
                 flex: 0 0 auto; min-width: 65px; height: 52px; font-size: 10px; padding: 4px 1px;
@@ -83,23 +83,14 @@
         .card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 15px; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } .grid-3 { grid-template-columns: 1fr 1fr 1fr; } }
-
-        .filter-btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
-        .filter-pill { padding: 9px 14px; border: 2px solid var(--border); background: #f8fafc; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; display: inline-flex; align-items: center; gap: 6px; color: #334155; }
-        .filter-pill.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 3px 8px rgba(52, 152, 219, 0.35); }
+        @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 
         .btn { padding: 9px 14px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
         .btn-purple { background: var(--purple); color: white; }
         .btn-outline { background: white; color: var(--accent); border: 1.5px solid var(--accent); }
         .btn:hover { opacity: 0.9; }
 
-        input[type="text"], input[type="date"], input[type="number"], select, textarea {
+        input[type="text"], input[type="date"], input[type="number"], select {
             width: 100%; padding: 10px 12px; margin-top: 4px; margin-bottom: 10px;
             border: 1px solid var(--border); border-radius: 6px; font-size: 15px; background: #fff;
         }
@@ -115,11 +106,9 @@
         th, td { border: 1px solid var(--border); padding: 8px 6px; text-align: center; vertical-align: middle; }
         th { background: #f1f3f5; color: var(--primary); font-weight: bold; }
 
-        /* Toast */
         #toastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast-message { color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: bold; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; }
 
-        /* 新增：成績表專屬樣式 */
         .score-input { width: 55px !important; padding: 6px !important; text-align: center; font-weight: bold; }
         .rank-input { width: 55px !important; padding: 6px !important; text-align: center; }
         .avg-cell { font-weight: bold; color: #b91c1c; background: #fff5f5; }
@@ -130,6 +119,24 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--success); }
         input:checked + .slider:before { transform: translateX(20px); }
+
+        /* 🌟 學生金色紅榜專屬特效 */
+        .name-gold {
+            color: #d97706 !important;
+            font-weight: 900 !important;
+            text-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+            font-size: 16px;
+        }
+        .name-gold::after {
+            content: ' 🏆';
+            font-size: 14px;
+            animation: bounce 1s infinite alternate;
+            display: inline-block;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-3px); }
+        }
     </style>
 </head>
 <body>
@@ -149,7 +156,7 @@
 
 <div class="container">
     <div class="tabs no-print">
-        <button class="tab-btn active" onclick="switchTab('rollcall')">
+        <button class="tab-btn" onclick="switchTab('rollcall')">
             <span class="tab-icon">📱</span><span>今日點名</span>
         </button>
         <button class="tab-btn" onclick="switchTab('absent-alert')">
@@ -158,7 +165,7 @@
         <button class="tab-btn" onclick="switchTab('sheet')">
             <span class="tab-icon">🖨️</span><span>點名表</span>
         </button>
-        <button class="tab-btn" onclick="switchTab('scores')">
+        <button class="tab-btn active" onclick="switchTab('scores')">
             <span class="tab-icon">💯</span><span>成績登記</span>
         </button>
         <button class="tab-btn" onclick="switchTab('course-config')">
@@ -169,20 +176,14 @@
         </button>
     </div>
 
-    <!-- 1. 今日點名 (保留原有架構簡化顯示) -->
-    <div id="tab-rollcall">
-        <div class="card no-print">
-            <h3 style="color:var(--primary);">📅 今日課堂點名功能已整合</h3>
-            <p>請參考原有點名系統程式碼區塊（因篇幅限制，核心已連接 Firebase，此處保留 UI 結構，重點展示新加入的成績模組與設定模組）。</p>
-        </div>
-    </div>
+    <!-- 佔位區塊 (保留原本的介面結構) -->
+    <div id="tab-rollcall" style="display:none;"><div class="card"><h3>📅 點名系統 UI 保留區塊</h3></div></div>
+    <div id="tab-absent-alert" style="display:none;"><div class="card"><h3>🚨 未到提醒 UI 保留區塊</h3></div></div>
+    <div id="tab-sheet" style="display:none;"><div class="card"><h3>🖨️ 點名表 UI 保留區塊</h3></div></div>
+    <div id="tab-students-master" style="display:none;"><div class="card"><h3>👥 學生總覽 UI 保留區塊</h3></div></div>
 
-    <div id="tab-absent-alert" style="display:none;"><div class="card"><h3>🚨 未到提醒區塊保留</h3></div></div>
-    <div id="tab-sheet" style="display:none;"><div class="card"><h3>🖨️ 點名表生成區塊保留</h3></div></div>
-    <div id="tab-students-master" style="display:none;"><div class="card"><h3>👥 學生總覽區塊保留</h3></div></div>
-
-    <!-- 🌟 新增：成績登記分頁 -->
-    <div id="tab-scores" style="display:none;">
+    <!-- 💯 成績登記分頁 -->
+    <div id="tab-scores" style="display:block;">
         <div class="card">
             <h3 style="color:var(--primary); font-size:17px; margin-bottom:12px;">💯 班級成績登記與排名</h3>
             <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:10px;">
@@ -211,19 +212,13 @@
         </div>
     </div>
 
-    <!-- 3. 課程開課起始日排程 (新增成績設定區塊) -->
+    <!-- ⚙️ 系統設定分頁 -->
     <div id="tab-course-config" style="display:none;">
         <div class="card">
-            <h3 style="color:var(--primary); font-size:17px;">⚙️ 課程開課起訖日與點名表週期排程</h3>
-            <p style="color:#666; font-size:13px; margin-top:4px;">排程管理功能保留（如原有功能）...</p>
+            <h3 style="color:var(--primary); font-size:17px;">⚙️ 課程排程保留區塊</h3>
         </div>
 
-        <div class="card" style="border-top: 4px solid var(--warning);">
-            <h3 style="color:var(--primary); font-size:17px;">📢 國定假日與停課放假設定</h3>
-            <p>放假管理功能保留...</p>
-        </div>
-
-        <!-- 🌟 新增：成績系統動態參數設定區 -->
+        <!-- 成績系統參數設定區 -->
         <div class="card" style="border-top: 4px solid var(--purple);">
             <h3 style="color:var(--primary); font-size:17px; margin-bottom:12px;">🏆 成績系統參數設定 (學年度 / 考試類別)</h3>
             <div class="grid-2">
@@ -323,12 +318,10 @@
         } else if (tab === 'course-config') {
             document.querySelectorAll('.tab-btn')[4].classList.add('active');
             renderGeneralSettingsLists();
-        } else {
-            // 對應其它按鈕 active...
         }
     };
 
-    // 🚀 初始化雲端資料 (包含原有功能與新的成績資料表)
+    // 🚀 初始化雲端資料
     async function initCloudData() {
         updateSyncIndicator('syncing', '🔄 正在載入雲端資料...');
         try {
@@ -373,17 +366,14 @@
         const courseSel = document.getElementById('scoreCourse');
         if(!yearSel || !examSel || !courseSel) return;
 
-        // 填寫學年度
         const curYear = yearSel.value;
         yearSel.innerHTML = window.state.generalSettings.years.map(y => `<option value="${y}">${y}</option>`).join('');
         if(curYear && window.state.generalSettings.years.includes(curYear)) yearSel.value = curYear;
 
-        // 填寫考試類別
         const curExam = examSel.value;
         examSel.innerHTML = window.state.generalSettings.exams.map(e => `<option value="${e}">${e}</option>`).join('');
         if(curExam && window.state.generalSettings.exams.includes(curExam)) examSel.value = curExam;
 
-        // 填寫班級
         const curCourse = courseSel.value;
         courseSel.innerHTML = '<option value="">-- 請選擇登記班級 --</option>';
         ['junior', 'elementary', 'care'].forEach(dept => {
@@ -434,8 +424,8 @@
             <thead>
                 <tr>
                     <th style="width:40px;">座號</th>
-                    <th style="width:90px;">學生姓名</th>
-                    <th style="width:110px;">學校</th>
+                    <th style="width:110px;">學生姓名</th>
+                    <th style="width:100px;">學校</th>
                     <th>${isJunior ? '國文' : '國語'}</th>
                     <th>英文</th>
                     <th>數學</th>
@@ -454,7 +444,7 @@
             
             html += `<tr>
                 <td style="font-weight:bold;">${idx + 1}</td>
-                <td><b style="color:var(--primary);">${stu.name}</b></td>
+                <td><b id="stuName_${idx}" style="color:var(--primary); transition: 0.3s;">${stu.name}</b></td>
                 <td style="font-size:12px; color:#64748b;">${stu.school || '-'}</td>
                 <td><input type="number" class="score-input" value="${rec.ch||''}" onchange="saveScore('${key}','ch',this.value)" id="ch_${idx}"></td>
                 <td><input type="number" class="score-input" value="${rec.en||''}" onchange="saveScore('${key}','en',this.value)" id="en_${idx}"></td>
@@ -497,25 +487,48 @@
         html += `</tbody></table>`;
         container.innerHTML = html;
         
-        // 渲染完即時計算
+        // 渲染完即時計算一次，並判斷是否觸發金色特效
         classStudents.forEach((_, idx) => calcScoreTotal(idx));
     };
 
     function calcScoreTotal(idx) {
         const subjects = ['ch', 'en', 'ma', 'sc', 'so'];
-        let total = 0; let count = 0;
+        let total = 0; let count = 0; let hasPerfectScore = false;
+        
         subjects.forEach(sub => {
             const el = document.getElementById(`${sub}_${idx}`);
             if(el && el.value !== '') {
-                total += parseFloat(el.value);
+                let score = parseFloat(el.value);
+                total += score;
                 count++;
+                if(score === 100) hasPerfectScore = true;
             }
         });
+        
         const tEl = document.getElementById(`total_${idx}`);
         const aEl = document.getElementById(`avg_${idx}`);
+        const nameEl = document.getElementById(`stuName_${idx}`);
+        
+        let avg = 0;
+        if (count > 0) {
+            avg = parseFloat((total / count).toFixed(1));
+        }
+
         if(tEl) tEl.innerText = count > 0 ? total : 0;
-        if(aEl) aEl.innerText = count > 0 ? (total / count).toFixed(1) : 0;
-        return { total, avg: count > 0 ? (total / count).toFixed(1) : 0 };
+        if(aEl) aEl.innerText = count > 0 ? avg : 0;
+        
+        // 🌟 自動金色紅榜判斷邏輯
+        if (nameEl) {
+            if (avg >= 90 || hasPerfectScore) {
+                nameEl.classList.add('name-gold');
+                nameEl.style.color = ''; // 讓 CSS class 優先
+            } else {
+                nameEl.classList.remove('name-gold');
+                nameEl.style.color = 'var(--primary)'; // 恢復原本的深藍色
+            }
+        }
+
+        return { total, avg };
     }
 
     window.saveScore = function(key, field, value) {
