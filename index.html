@@ -68,9 +68,13 @@
                         <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
                         <span>匯出 Excel</span>
                     </button>
-                    <button onclick="printOrPreviewHonor()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-indigo-950 text-xs font-black transition shadow">
-                        <i data-lucide="award" class="w-3.5 h-3.5"></i>
-                        <span>列印/榮譽榜海報</span>
+                    <button onclick="saveCurrentToHistory()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                        <span>儲存當前成績單</span>
+                    </button>
+                    <button onclick="openHistoryModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-indigo-950 text-xs font-black transition shadow">
+                        <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+                        <span>讀取歷史成績</span>
                     </button>
                 </div>
             </div>
@@ -262,54 +266,22 @@
         </div>
     </div>
 
-    <!-- 彈窗 3：榮譽榜列印 / 預覽 (直接可 Print 或截圖) -->
-    <div id="honorModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-auto">
-            <div class="flex items-center justify-between border-b pb-3">
+    <!-- 彈窗 3：歷史紀錄讀取 -->
+    <div id="historyModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
                 <div class="flex items-center gap-2">
-                    <span class="p-2 rounded-xl bg-amber-100 text-amber-600"><i data-lucide="award" class="w-5 h-5"></i></span>
-                    <h3 class="font-black text-lg text-slate-800">斗六顧德補習班 - 段考金榜列印與預覽</h3>
+                    <span class="p-2 rounded-xl bg-amber-100 text-amber-600"><i data-lucide="folder-open" class="w-5 h-5"></i></span>
+                    <h3 class="font-black text-lg text-slate-800">歷史成績紀錄管理</h3>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="window.print()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1">
-                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>列印榜單
-                    </button>
-                    <button onclick="closeHonorModal()" class="text-slate-400 hover:text-slate-600 p-1">
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </button>
-                </div>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
-
-            <!-- 可列印區塊 -->
-            <div id="printableHonorArea" class="space-y-6">
-                <div class="text-center space-y-1">
-                    <h2 class="text-2xl font-black text-indigo-900" id="honorTitleDisplay">斗六顧德補習班 段考榮譽金榜</h2>
-                    <p class="text-sm font-bold text-slate-600" id="honorSubtitleDisplay">113學年度第一學期 第一次段考 成績優異金榜</p>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs border border-slate-300">
-                        <thead>
-                            <tr class="bg-slate-100 border-b border-slate-300 text-slate-700 font-black">
-                                <th class="p-2 border-r border-slate-200 text-center w-12">座號</th>
-                                <th class="p-2 border-r border-slate-200">學生姓名</th>
-                                <th class="p-2 border-r border-slate-200">學校</th>
-                                <th class="p-2 border-r border-slate-200 text-center">總分</th>
-                                <th class="p-2 border-r border-slate-200 text-center">平均</th>
-                                <th class="p-2 border-r border-slate-200 text-center">班排</th>
-                                <th class="p-2 border-r border-slate-200 text-center">校排</th>
-                                <th class="p-2 text-center">榮獲獎狀</th>
-                            </tr>
-                        </thead>
-                        <tbody id="honorTableBody" class="divide-y divide-slate-200">
-                            <!-- JS 渲染 -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="flex justify-between items-center text-xs text-slate-500 pt-3 border-t">
-                    <span>顧德補習班・精準教學・榜單保證</span>
-                    <span>列印日期：<span id="printDateSpan"></span></span>
+            
+            <div class="flex-1 overflow-y-auto pr-2">
+                <div id="historyListContainer" class="space-y-3">
+                    <!-- JS 動態生成歷史紀錄列表 -->
                 </div>
             </div>
         </div>
@@ -323,7 +295,8 @@
 
     <!-- JavaScript 試算表核心互動邏輯 -->
     <script>
-        const STORAGE_KEY = 'douliu_goode_fast_exam_v2';
+        const STORAGE_KEY = 'douliu_goode_fast_exam_v3_draft';
+        const HISTORY_KEY = 'douliu_goode_exam_history';
 
         // 預設所有可選科目庫（包含國中、高中常用科與數理拆分科目）
         let allAvailableSubjects = ['國文', '數學', '英文', '物理', '化學', '理化', '歷史', '地理', '公民', '生物', '地科', '自然', '社會'];
@@ -885,47 +858,151 @@
             showToast('已匯出 Excel (CSV) 檔案！');
         }
 
-        // 預覽榮譽榜與列印
-        function printOrPreviewHonor() {
-            const year = document.getElementById('batchYear').value;
-            const exam = document.getElementById('batchExam').value;
-            const className = document.getElementById('batchClass').value;
+        // --- 歷史紀錄存取功能 ---
+        function saveCurrentToHistory() {
+            const year = document.getElementById('batchYear').value.trim();
+            const exam = document.getElementById('batchExam').value.trim();
+            const school = document.getElementById('batchSchool').value.trim();
+            const className = document.getElementById('batchClass').value.trim();
 
-            document.getElementById('honorTitleDisplay').textContent = `斗六顧德補習班 - ${className} 段考榮譽榜`;
-            document.getElementById('honorSubtitleDisplay').textContent = `${year} ${exam} 學員成績總榜單`;
-            document.getElementById('printDateSpan').textContent = new Date().toLocaleDateString('zh-TW');
+            if (!year || !exam || !school || !className) {
+                showToast('請先填寫上方完整的學年度、段考別、學校與班級資訊！');
+                return;
+            }
 
-            const tbody = document.getElementById('honorTableBody');
-            tbody.innerHTML = studentRows.map((r, idx) => {
-                let total = 0, count = 0;
-                currentActiveSubjects.forEach(sub => {
-                    const s = parseFloat(r.scores?.[sub]);
-                    if (!isNaN(s)) { total += s; count++; }
-                });
-                const avg = count > 0 ? (total / count).toFixed(1) : '-';
+            // 使用 [年_考_校_班] 作為唯一紀錄ID
+            const recordId = `${year}_${exam}_${school}_${className}`;
+            const recordData = {
+                id: recordId,
+                timestamp: Date.now(),
+                year, exam, school, className,
+                allAvailableSubjects: [...allAvailableSubjects],
+                activeSubjects: [...currentActiveSubjects],
+                studentRows: JSON.parse(JSON.stringify(studentRows)) // 深度拷貝學生資料
+            };
 
-                return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 border-r border-slate-200 text-center font-bold text-slate-500">${r.seat || (idx + 1)}</td>
-                        <td class="p-2 border-r border-slate-200 font-black text-slate-900">${escapeHtml(r.name || '未填')}</td>
-                        <td class="p-2 border-r border-slate-200 text-indigo-700 font-bold">${escapeHtml(r.school || '')}</td>
-                        <td class="p-2 border-r border-slate-200 text-center font-bold">${count > 0 ? total : '-'}</td>
-                        <td class="p-2 border-r border-slate-200 text-center font-black text-indigo-900">${avg}</td>
-                        <td class="p-2 border-r border-slate-200 text-center font-black ${r.classRank == 1 ? 'text-amber-600' : ''}">${r.classRank ? '第 ' + r.classRank + ' 名' : '-'}</td>
-                        <td class="p-2 border-r border-slate-200 text-center text-slate-600">${r.schoolRank ? r.schoolRank : '-'}</td>
-                        <td class="p-2 text-center font-bold text-amber-600">${r.cert && r.cert !== '無' ? '🏅 ' + escapeHtml(r.cert) : '—'}</td>
-                    </tr>
-                `;
-            }).join('');
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch(e) { history = []; }
 
-            document.getElementById('honorModal').classList.remove('hidden');
-            document.getElementById('honorModal').classList.add('flex');
+            const existingIdx = history.findIndex(r => r.id === recordId);
+            if (existingIdx >= 0) {
+                if (confirm(`紀錄「${recordId}」已存在，是否覆寫更新為目前的成績？`)) {
+                    history[existingIdx] = recordData;
+                } else {
+                    return;
+                }
+            } else {
+                history.push(recordData);
+            }
+
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            showToast(`已成功儲存成績單：${recordId}`);
+        }
+
+        function openHistoryModal() {
+            document.getElementById('historyModal').classList.remove('hidden');
+            document.getElementById('historyModal').classList.add('flex');
+            renderHistoryList();
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
+            document.getElementById('historyModal').classList.remove('flex');
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('historyListContainer');
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch(e) { history = []; }
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-slate-400 font-bold">目前沒有任何儲存的歷史紀錄。</div>';
+                lucide.createIcons();
+                return;
+            }
+
+            // 依時間排序 (新 -> 舊)
+            history.sort((a, b) => b.timestamp - a.timestamp);
+
+            container.innerHTML = history.map(r => `
+                <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+                    <div class="flex-1 min-w-[200px]">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 text-[11px] font-black">${escapeHtml(r.year)}</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-[11px] font-black">${escapeHtml(r.exam)}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">${escapeHtml(r.school)} - ${escapeHtml(r.className)}</h4>
+                        <p class="text-xs text-slate-400">上次儲存：${new Date(r.timestamp).toLocaleString('zh-TW')} | 總計：${r.studentRows ? r.studentRows.length : 0} 位學生</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="loadHistoryRecord('${r.id}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i>讀取
+                        </button>
+                        <button onclick="deleteHistoryRecord('${r.id}')" class="px-3 py-2 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-lg text-xs font-bold flex items-center justify-center shadow-sm" title="刪除此紀錄">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
-        function closeHonorModal() {
-            document.getElementById('honorModal').classList.add('hidden');
-            document.getElementById('honorModal').classList.remove('flex');
+        function loadHistoryRecord(id) {
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch(e) { history = []; }
+
+            const record = history.find(r => r.id === id);
+            if (!record) {
+                showToast('找不到該筆紀錄！');
+                return;
+            }
+
+            if (!confirm('讀取歷史紀錄將覆寫當前表格內容，確定要讀取嗎？')) {
+                return;
+            }
+
+            // 更新 UI 頂部資訊
+            document.getElementById('batchYear').value = record.year || '';
+            document.getElementById('batchExam').value = record.exam || '';
+            document.getElementById('batchSchool').value = record.school || '';
+            document.getElementById('batchClass').value = record.className || '';
+
+            // 更新考科狀態 (維持歷史存檔時的考科配置)
+            if (record.allAvailableSubjects) allAvailableSubjects = [...record.allAvailableSubjects];
+            if (record.activeSubjects) currentActiveSubjects = [...record.activeSubjects];
+            
+            // 更新學生成績資料
+            if (record.studentRows) studentRows = JSON.parse(JSON.stringify(record.studentRows));
+            else studentRows = [];
+
+            renderSubjectCheckboxes(); // 更新彈窗內的勾選狀態
+            renderTable(); // 重新渲染大表格
+            autoSaveState();
+            closeHistoryModal();
+            showToast(`已成功載入成績單：${record.className} (${record.year})`);
+        }
+
+        function deleteHistoryRecord(id) {
+            if (!confirm('確定要永久刪除這筆歷史紀錄嗎？無法復原！')) {
+                return;
+            }
+
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch(e) { history = []; }
+
+            history = history.filter(r => r.id !== id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            
+            renderHistoryList();
+            showToast('已成功刪除該筆紀錄！');
         }
 
         function clearAllDataConfirm() {
