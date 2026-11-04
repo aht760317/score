@@ -188,36 +188,48 @@
 
     <!-- 彈窗 1：考科自訂與勾選 -->
     <div id="subjectModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b pb-3">
                 <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
-                    <i data-lucide="settings" class="w-4 h-4 text-indigo-600"></i>
-                    自訂本次段考科目
+                    <i data-lucide="sliders" class="w-4 h-4 text-indigo-600"></i>
+                    考科管理與自由增減
                 </h3>
                 <button onclick="closeSubjectModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-500">勾選要在表格中輸入的科目，表格欄位將自動更新，不會遺失已輸入的學生姓名：</p>
+
+            <!-- 常用組合快捷選擇 -->
+            <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-600 pb-2 border-b">
+                <span class="font-bold text-slate-700">快速選擇：</span>
+                <button onclick="applyPresetSubjects(['國文','數學','英文','物理','化學','理化','歷史','地理'])" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border text-[11px] font-medium">全考科(8科)</button>
+                <button onclick="applyPresetSubjects(['國文','英文','數學','自然','社會'])" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border text-[11px] font-medium">會考五科</button>
+                <button onclick="applyPresetSubjects(['數學','物理','化學','理化'])" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border text-[11px] font-medium">理化數理組</button>
+                <button onclick="applyPresetSubjects(['國文','英文','歷史','地理','公民'])" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border text-[11px] font-medium">文史社會組</button>
+            </div>
+
+            <p class="text-xs text-slate-500">打勾即可將該科目加到表格；若不再需要可點擊科目標籤旁的「✕」將該科目徹底刪除：</p>
             
-            <div id="subjectCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-bold text-slate-700">
-                <!-- 動態注入常用科目勾選框 -->
+            <div id="subjectCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
+                <!-- 動態注入常用科目勾選與刪除按鈕 -->
             </div>
 
             <!-- 新增其他自訂科目 -->
-            <div class="pt-2 border-t">
-                <label class="block text-xs font-bold text-slate-700 mb-1">新增其他科目名稱：</label>
+            <div class="pt-3 border-t">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">新增全新自訂考科：</label>
                 <div class="flex gap-2">
-                    <input type="text" id="newCustomSubjectInput" placeholder="例如：地科、公民、作文" class="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs outline-none focus:border-indigo-500">
-                    <button onclick="addNewCustomSubject()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold">
-                        ＋新增
+                    <input type="text" id="newCustomSubjectInput" placeholder="例如：公民、生物、地科、作文" class="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs outline-none focus:border-indigo-500 font-medium" onkeydown="if(event.key==='Enter') addNewCustomSubject()">
+                    <button onclick="addNewCustomSubject()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>新增科目</span>
                     </button>
                 </div>
             </div>
 
-            <div class="pt-2 flex justify-end">
-                <button onclick="closeSubjectModal()" class="px-5 py-2 bg-indigo-900 text-white rounded-lg text-xs font-bold hover:bg-indigo-800">
-                    確定並更新表格
+            <div class="pt-2 flex justify-between items-center border-t">
+                <span class="text-[11px] text-slate-400">目前啟用：<strong id="modalActiveSubCount" class="text-indigo-600">0</strong> 科</span>
+                <button onclick="closeSubjectModal()" class="px-5 py-2 bg-indigo-900 text-white rounded-lg text-xs font-bold hover:bg-indigo-800 shadow">
+                    儲存並更新表格
                 </button>
             </div>
         </div>
@@ -311,26 +323,25 @@
 
     <!-- JavaScript 試算表核心互動邏輯 -->
     <script>
-        const STORAGE_KEY = 'douliu_goode_fast_exam_v1';
+        const STORAGE_KEY = 'douliu_goode_fast_exam_v2';
 
-        // 預設可選科目庫
-        const ALL_AVAILABLE_SUBJECTS = ['國文', '英文', '數學', '自然', '社會', '理化', '生物', '歷史', '地理', '公民'];
+        // 預設所有可選科目庫（包含國中、高中常用科與數理拆分科目）
+        let allAvailableSubjects = ['國文', '數學', '英文', '物理', '化學', '理化', '歷史', '地理', '公民', '生物', '地科', '自然', '社會'];
 
-        // 當前系統狀態
-        let currentActiveSubjects = ['國文', '英文', '數學', '自然', '社會'];
+        // 當前啟用顯示於大表格的科目（預設為使用者指定的 8 大科目）
+        let currentActiveSubjects = ['國文', '數學', '英文', '物理', '化學', '理化', '歷史', '地理'];
         let studentRows = [];
 
         // 初始化
         window.addEventListener('DOMContentLoaded', () => {
             loadFromStorage();
             if (studentRows.length === 0) {
-                // 預設帶入 5 位斗六顧德示範學員，方便使用者立即測試打字
+                // 預設帶入斗六顧德示範學員
                 studentRows = [
-                    { seat: 1, name: '林宥辰', school: '斗六國中', scores: { '國文': 96, '英文': 100, '數學': 100, '自然': 98, '社會': 94 }, classRank: 1, schoolRank: 2, cert: '第一名獎狀' },
-                    { seat: 2, name: '張語彤', school: '正心中學', scores: { '國文': 94, '英文': 98, '數學': 96, '自然': 95, '社會': 92 }, classRank: 2, schoolRank: 5, cert: '前三名獎狀' },
-                    { seat: 3, name: '陳品睿', school: '鎮西國小', scores: { '國文': 98, '英文': 100, '數學': 94, '自然': 92, '社會': 96 }, classRank: 3, schoolRank: '', cert: '前三名獎狀' },
-                    { seat: 4, name: '許家豪', school: '雲林國中', scores: { '國文': 88, '英文': 92, '數學': 90, '自然': 86, '社會': 88 }, classRank: 4, schoolRank: '', cert: '進步獎' },
-                    { seat: 5, name: '黃子晴', school: '公誠國小', scores: { '國文': 92, '英文': 90, '數學': 85, '自然': 88, '社會': 90 }, classRank: 5, schoolRank: '', cert: '無' }
+                    { seat: 1, name: '林宥辰', school: '斗六國中', scores: { '國文': 96, '數學': 100, '英文': 98, '物理': 95, '化學': 94, '理化': 98, '歷史': 92, '地理': 94 }, classRank: 1, schoolRank: 2, cert: '第一名獎狀' },
+                    { seat: 2, name: '張語彤', school: '正心中學', scores: { '國文': 94, '數學': 96, '英文': 100, '物理': 92, '化學': 90, '理化': 94, '歷史': 96, '地理': 95 }, classRank: 2, schoolRank: 5, cert: '前三名獎狀' },
+                    { seat: 3, name: '陳品睿', school: '雲林國中', scores: { '國文': 90, '數學': 92, '英文': 94, '物理': 88, '化學': 86, '理化': 90, '歷史': 90, '地理': 88 }, classRank: 3, schoolRank: '', cert: '前三名獎狀' },
+                    { seat: 4, name: '許家豪', school: '石榴國中', scores: { '國文': 86, '數學': 88, '英文': 85, '物理': 82, '化學': 84, '理化': 85, '歷史': 88, '地理': 86 }, classRank: 4, schoolRank: '', cert: '進步獎' }
                 ];
             }
             renderSubjectCheckboxes();
@@ -348,7 +359,12 @@
                     if (parsed.batchExam) document.getElementById('batchExam').value = parsed.batchExam;
                     if (parsed.batchSchool) document.getElementById('batchSchool').value = parsed.batchSchool;
                     if (parsed.batchClass) document.getElementById('batchClass').value = parsed.batchClass;
-                    if (parsed.activeSubjects && parsed.activeSubjects.length > 0) currentActiveSubjects = parsed.activeSubjects;
+                    if (parsed.allAvailableSubjects && Array.isArray(parsed.allAvailableSubjects)) {
+                        allAvailableSubjects = parsed.allAvailableSubjects;
+                    }
+                    if (parsed.activeSubjects && parsed.activeSubjects.length > 0) {
+                        currentActiveSubjects = parsed.activeSubjects;
+                    }
                     if (parsed.studentRows) studentRows = parsed.studentRows;
                 }
             } catch (e) {
@@ -362,14 +378,14 @@
                 batchExam: document.getElementById('batchExam').value,
                 batchSchool: document.getElementById('batchSchool').value,
                 batchClass: document.getElementById('batchClass').value,
+                allAvailableSubjects: allAvailableSubjects,
                 activeSubjects: currentActiveSubjects,
                 studentRows: studentRows
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             
-            // 顯示已存檔勾號動畫
             const indicator = document.getElementById('saveStatusIndicator');
-            indicator.classList.remove('opacity-0');
+            if (indicator) indicator.classList.remove('opacity-0');
         }
 
         // 重新渲染整張大表格
@@ -409,7 +425,6 @@
             const defaultSchool = document.getElementById('batchSchool').value || '斗六國中';
 
             tbody.innerHTML = studentRows.map((row, rIdx) => {
-                // 自動計算總分與平均
                 let total = 0;
                 let count = 0;
                 currentActiveSubjects.forEach(sub => {
@@ -435,6 +450,8 @@
                             <input type="number" step="0.5" min="0" max="100"
                                 value="${scoreVal}"
                                 placeholder="-"
+                                onfocus="this.select()"
+                                onkeydown="handleCellKeyNavigation(event, ${rIdx})"
                                 oninput="updateScore(${rIdx}, '${escapeHtml(sub)}', this.value)"
                                 class="grid-cell-input text-center ${fontColor}">
                         </td>
@@ -446,6 +463,7 @@
                         <!-- 座號 -->
                         <td class="p-0 border-r border-slate-200 text-center">
                             <input type="number" value="${row.seat !== undefined ? row.seat : (rIdx + 1)}"
+                                onfocus="this.select()"
                                 onchange="updateRowField(${rIdx}, 'seat', this.value)"
                                 class="grid-cell-input text-center text-slate-500 font-semibold">
                         </td>
@@ -453,6 +471,8 @@
                         <td class="p-0 border-r border-slate-200">
                             <input type="text" value="${escapeHtml(row.name || '')}"
                                 placeholder="學生姓名"
+                                onfocus="this.select()"
+                                onkeydown="handleCellKeyNavigation(event, ${rIdx})"
                                 onchange="updateRowField(${rIdx}, 'name', this.value)"
                                 class="grid-cell-input font-bold text-slate-900">
                         </td>
@@ -460,6 +480,7 @@
                         <td class="p-0 border-r border-slate-200">
                             <input type="text" list="douliuSchoolList" value="${escapeHtml(row.school || defaultSchool)}"
                                 placeholder="學校"
+                                onfocus="this.select()"
                                 onchange="updateRowField(${rIdx}, 'school', this.value)"
                                 class="grid-cell-input text-indigo-700 font-medium">
                         </td>
@@ -477,6 +498,7 @@
                         <td class="p-0 border-r border-slate-200 text-center">
                             <input type="number" min="1" value="${row.classRank || ''}"
                                 placeholder="-"
+                                onfocus="this.select()"
                                 onchange="updateRowField(${rIdx}, 'classRank', this.value)"
                                 class="grid-cell-input text-center font-bold ${row.classRank == 1 ? 'text-amber-600 font-black' : 'text-slate-800'}">
                         </td>
@@ -484,6 +506,7 @@
                         <td class="p-0 border-r border-slate-200 text-center">
                             <input type="number" min="1" value="${row.schoolRank || ''}"
                                 placeholder="-"
+                                onfocus="this.select()"
                                 onchange="updateRowField(${rIdx}, 'schoolRank', this.value)"
                                 class="grid-cell-input text-center text-slate-600">
                         </td>
@@ -511,6 +534,28 @@
             lucide.createIcons();
         }
 
+        // Enter 按鍵垂直跳到下一位學生的同一個欄位
+        function handleCellKeyNavigation(event, currentRowIdx) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const currentInput = event.target;
+                const currentTd = currentInput.closest('td');
+                if (!currentTd) return;
+                const colIdx = Array.from(currentTd.parentNode.children).indexOf(currentTd);
+                const nextRow = currentTd.parentNode.nextElementSibling;
+                if (nextRow && nextRow.children[colIdx]) {
+                    const nextInput = nextRow.children[colIdx].querySelector('input');
+                    if (nextInput) {
+                        nextInput.focus();
+                        nextInput.select();
+                    }
+                } else if (!nextRow) {
+                    // 若已在最後一行，按 Enter 直接自動新增一行
+                    addRow();
+                }
+            }
+        }
+
         // 修改資料即時觸發
         function updateScore(rowIndex, subject, value) {
             if (!studentRows[rowIndex]) return;
@@ -521,7 +566,6 @@
                 studentRows[rowIndex].scores[subject] = parseFloat(value);
             }
             autoSaveState();
-            // 只輕量重算該列總分與平均，不重繪整個 DOM 避免輸入框失去焦點
             refreshRowCalculatedStats(rowIndex);
         }
 
@@ -541,7 +585,6 @@
 
             const tr = document.getElementById('studentTableBody').children[rowIndex];
             if (tr) {
-                // 總分欄位置為： 3 (座號/姓名/學校) + 科目數
                 const totalCell = tr.children[3 + currentActiveSubjects.length];
                 const avgCell = tr.children[4 + currentActiveSubjects.length];
                 if (totalCell) totalCell.textContent = count > 0 ? total : '-';
@@ -569,7 +612,6 @@
             });
             renderTable();
             autoSaveState();
-            // 自動 focus 最後一列的姓名輸入框
             setTimeout(() => {
                 const inputs = document.querySelectorAll('input[placeholder="學生姓名"]');
                 if (inputs.length > 0) inputs[inputs.length - 1].focus();
@@ -596,7 +638,6 @@
 
         function deleteRow(index) {
             studentRows.splice(index, 1);
-            // 重新整理座號
             studentRows.forEach((r, idx) => {
                 if (r.seat === undefined || r.seat === '') r.seat = idx + 1;
             });
@@ -612,11 +653,10 @@
             renderTable();
         }
 
-        // 依照平均分數自動排名 (排 1, 2, 3...)
+        // 依照平均分數自動排名
         function autoCalculateRanks() {
             if (studentRows.length === 0) return;
 
-            // 計算每人平均
             studentRows.forEach(r => {
                 let total = 0, count = 0;
                 currentActiveSubjects.forEach(sub => {
@@ -629,12 +669,10 @@
                 r._tempAvg = count > 0 ? (total / count) : -1;
             });
 
-            // 建立排序副本 (平均由高到低)
             const sorted = [...studentRows].filter(r => r._tempAvg >= 0).sort((a, b) => b._tempAvg - a._tempAvg);
 
             sorted.forEach((item, index) => {
                 item.classRank = index + 1;
-                // 自動幫前三名加上獎狀選項
                 if (item.classRank === 1 && (!item.cert || item.cert === '無')) {
                     item.cert = '第一名獎狀';
                 } else if (item.classRank <= 3 && (!item.cert || item.cert === '無')) {
@@ -694,7 +732,7 @@
             showToast(`已成功批次匯入 ${names.length} 位學生！`);
         }
 
-        // 科目自訂彈窗
+        // === 科目自訂與增減管理核心 ===
         function openSubjectModal() {
             document.getElementById('subjectModal').classList.remove('hidden');
             document.getElementById('subjectModal').classList.add('flex');
@@ -710,15 +748,24 @@
 
         function renderSubjectCheckboxes() {
             const container = document.getElementById('subjectCheckboxes');
-            container.innerHTML = ALL_AVAILABLE_SUBJECTS.map(sub => {
+            const countSpan = document.getElementById('modalActiveSubCount');
+            if (countSpan) countSpan.textContent = currentActiveSubjects.length;
+
+            container.innerHTML = allAvailableSubjects.map(sub => {
                 const isChecked = currentActiveSubjects.includes(sub);
                 return `
-                    <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer select-none">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSubject('${escapeHtml(sub)}', this.checked)" class="rounded text-indigo-600">
-                        <span>${escapeHtml(sub)}</span>
-                    </label>
+                    <div class="flex items-center justify-between p-2 rounded-lg border ${isChecked ? 'border-indigo-300 bg-indigo-50/70 text-indigo-950 font-bold' : 'border-slate-200 bg-slate-50 text-slate-600'} select-none transition">
+                        <label class="flex items-center gap-2 flex-1 cursor-pointer">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSubject('${escapeHtml(sub)}', this.checked)" class="rounded text-indigo-600 w-4 h-4 cursor-pointer">
+                            <span class="text-xs">${escapeHtml(sub)}</span>
+                        </label>
+                        <button type="button" onclick="deleteSubjectFromList('${escapeHtml(sub)}')" class="text-slate-300 hover:text-rose-500 p-0.5 rounded transition" title="從清單中刪除此科">
+                            <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
                 `;
             }).join('');
+            lucide.createIcons();
         }
 
         function toggleSubject(subject, checked) {
@@ -732,17 +779,61 @@
                 }
                 currentActiveSubjects = currentActiveSubjects.filter(s => s !== subject);
             }
+            const countSpan = document.getElementById('modalActiveSubCount');
+            if (countSpan) countSpan.textContent = currentActiveSubjects.length;
         }
 
         function addNewCustomSubject() {
             const input = document.getElementById('newCustomSubjectInput');
             const val = input.value.trim();
-            if (!val) return;
-            if (!ALL_AVAILABLE_SUBJECTS.includes(val)) ALL_AVAILABLE_SUBJECTS.push(val);
-            if (!currentActiveSubjects.includes(val)) currentActiveSubjects.push(val);
+            if (!val) {
+                showToast('請輸入要新增的科目名稱');
+                return;
+            }
+            if (!allAvailableSubjects.includes(val)) {
+                allAvailableSubjects.push(val);
+            }
+            if (!currentActiveSubjects.includes(val)) {
+                currentActiveSubjects.push(val);
+            }
             input.value = '';
             renderSubjectCheckboxes();
-            showToast(`已新增科目「${val}」`);
+            autoSaveState();
+            showToast(`已成功新增科目「${val}」並啟用！`);
+        }
+
+        function deleteSubjectFromList(subject) {
+            if (allAvailableSubjects.length <= 1) {
+                showToast('至少需保留一個科目！');
+                return;
+            }
+            // 從總庫與啟用庫中移除
+            allAvailableSubjects = allAvailableSubjects.filter(s => s !== subject);
+            currentActiveSubjects = currentActiveSubjects.filter(s => s !== subject);
+            
+            // 同時清除學員資料內該科歷史成績，維持乾淨
+            studentRows.forEach(r => {
+                if (r.scores && r.scores[subject] !== undefined) {
+                    delete r.scores[subject];
+                }
+            });
+
+            renderSubjectCheckboxes();
+            renderTable();
+            autoSaveState();
+            showToast(`已將「${subject}」自科目庫中刪除！`);
+        }
+
+        function applyPresetSubjects(presetList) {
+            // 將預設清單中缺少的自動補入 allAvailableSubjects
+            presetList.forEach(sub => {
+                if (!allAvailableSubjects.includes(sub)) allAvailableSubjects.push(sub);
+            });
+            currentActiveSubjects = [...presetList];
+            renderSubjectCheckboxes();
+            renderTable();
+            autoSaveState();
+            showToast(`已切換為：${presetList.join('、')}`);
         }
 
         // 匯出 Excel (CSV)
@@ -783,7 +874,6 @@
                 ].map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',');
             });
 
-            // 加入 UTF-8 BOM 避免 Excel 亂碼
             const csvContent = '\uFEFF' + headers.join(',') + '\r\n' + rows.join('\r\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -838,7 +928,6 @@
             document.getElementById('honorModal').classList.remove('flex');
         }
 
-        // 清空重來
         function clearAllDataConfirm() {
             if (confirm('確定要清空目前整班學生成績資料嗎？')) {
                 studentRows = [];
@@ -848,7 +937,6 @@
             }
         }
 
-        // 訊息吐司通知
         function showToast(text) {
             const toast = document.getElementById('toastMessage');
             document.getElementById('toastText').textContent = text;
